@@ -74,7 +74,7 @@ export function SignupForm({
     setLoading(true);
     try {
       await signIn("password", formData);
-      router.push("/game");
+      router.push("/dashboard");
     } catch (err) {
       const errorMessage = getErrorMessage(err);
       setError(errorMessage);
