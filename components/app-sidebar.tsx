@@ -11,13 +11,13 @@ import {
   IconFileWord,
   IconFolder,
   IconHelp,
-  IconInnerShadowTop,
   IconListDetails,
   IconReport,
   IconSearch,
   IconSettings,
   IconUsers,
 } from "@tabler/icons-react";
+import Image from "next/image";
 
 import { NavDocuments } from "@/components/nav-documents";
 import { NavMain } from "@/components/nav-main";
@@ -161,9 +161,15 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               asChild
               className="data-[slot=sidebar-menu-button]:p-1.5!"
             >
-              <Link href="/">
-                <IconInnerShadowTop className="size-5!" />
-                <span className="text-base font-semibold">Acme Inc.</span>
+              <Link href="/" className="flex items-center group">
+                <Image
+                  alt="Logo"
+                  className="size-6! pixel-crisp"
+                  height={40}
+                  src="/logo.jpeg"
+                  width={40}
+                />
+                <span className="font-semibold">Aperture</span>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
