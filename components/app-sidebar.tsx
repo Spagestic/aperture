@@ -164,9 +164,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               <Link href="/" className="flex items-center group">
                 <Image
                   alt="Logo"
-                  className="size-6! pixel-crisp object-cover"
+                  className="size-6! pixel-crisp object-cover rounded-xs dark:invert"
                   height={40}
-                  src="/logo.jpeg"
+                  src="/logo_.png"
                   width={40}
                 />
                 <span className="font-semibold">Aperture</span>
