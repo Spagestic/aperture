@@ -35,53 +35,74 @@ export function NavUser() {
   const { isMobile } = useSidebar();
   const isLoading = user === undefined;
 
+  if (isLoading) {
+    return (
+      <SidebarMenu>
+        <SidebarMenuItem>
+          <SidebarMenuButton
+            className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+            data-testid="user-nav-button"
+            size="lg"
+          >
+            <div className="flex flex-row gap-2 w-full">
+              <div className="size-8 animate-pulse rounded-lg bg-zinc-500/20" />
+              <div className="grid flex-1 text-left text-sm leading-tight gap-1">
+                <span className="w-3/5 h-4 rounded-lg animate-pulse bg-zinc-500/20 font-medium text-transparent">
+                  User Name
+                </span>
+                <span className="w-4/5 h-3 rounded-lg animate-pulse bg-zinc-500/20 text-xs text-transparent">
+                  User Email
+                </span>
+              </div>
+            </div>
+            <div className="animate-spin text-zinc-500">
+              <LoaderIcon className="size-4" />
+            </div>
+          </SidebarMenuButton>
+        </SidebarMenuItem>
+      </SidebarMenu>
+    );
+  }
+
+  if (!user) {
+    return (
+      <SidebarMenu>
+        <SidebarMenuItem>
+          <SidebarMenuButton asChild size="lg" data-testid="login-nav-button">
+            <Link href="/login">
+              <UserCircle />
+              <span>Login</span>
+            </Link>
+          </SidebarMenuButton>
+        </SidebarMenuItem>
+      </SidebarMenu>
+    );
+  }
+
   return (
     <SidebarMenu>
       <SidebarMenuItem>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            {isLoading ? (
-              <SidebarMenuButton
-                className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
-                data-testid="user-nav-button"
-                size="lg"
-              >
-                <div className="flex flex-row gap-2 w-full">
-                  <div className="size-8 animate-pulse rounded-lg bg-zinc-500/20" />
-                  <div className="grid flex-1 text-left text-sm leading-tight gap-1">
-                    <span className="w-3/5 h-4 rounded-lg animate-pulse bg-zinc-500/20 font-medium text-transparent">
-                      User Name
-                    </span>
-                    <span className="w-4/5 h-3 rounded-lg animate-pulse bg-zinc-500/20 text-xs text-transparent">
-                      User Email
-                    </span>
-                  </div>
-                </div>
-                <div className="animate-spin text-zinc-500">
-                  <LoaderIcon className="size-4" />
-                </div>
-              </SidebarMenuButton>
-            ) : (
-              <SidebarMenuButton
-                className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
-                data-testid="user-nav-button"
-                size="lg"
-              >
-                <Avatar className="h-8 w-8 rounded-lg grayscale">
-                  <AvatarImage src={user?.image || ""} alt={user?.name || ""} />
-                  <AvatarFallback className="rounded-lg">
-                    {user?.name?.charAt(0) || user?.email?.charAt(0) || "?"}
-                  </AvatarFallback>
-                </Avatar>
-                <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-medium">{user?.name}</span>
-                  <span className="text-muted-foreground truncate text-xs">
-                    {user?.email}
-                  </span>
-                </div>
-                <ChevronUp className="ml-auto" />
-              </SidebarMenuButton>
-            )}
+            <SidebarMenuButton
+              className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+              data-testid="user-nav-button"
+              size="lg"
+            >
+              <Avatar className="h-8 w-8 rounded-lg grayscale">
+                <AvatarImage src={user.image || ""} alt={user.name || ""} />
+                <AvatarFallback className="rounded-lg">
+                  {user.name?.charAt(0) || user.email?.charAt(0) || "?"}
+                </AvatarFallback>
+              </Avatar>
+              <div className="grid flex-1 text-left text-sm leading-tight">
+                <span className="truncate font-medium">{user.name}</span>
+                <span className="text-muted-foreground truncate text-xs">
+                  {user.email}
+                </span>
+              </div>
+              <ChevronUp className="ml-auto" />
+            </SidebarMenuButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent
             className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg z-100"
@@ -92,15 +113,15 @@ export function NavUser() {
             <DropdownMenuLabel className="p-0 font-normal">
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                 <Avatar className="h-8 w-8 rounded-lg">
-                  <AvatarImage src={user?.image || ""} alt={user?.name || ""} />
+                  <AvatarImage src={user.image || ""} alt={user.name || ""} />
                   <AvatarFallback className="rounded-lg">
-                    {user?.name?.charAt(0) || user?.email?.charAt(0) || "?"}
+                    {user.name?.charAt(0) || user.email?.charAt(0) || "?"}
                   </AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-medium">{user?.name}</span>
+                  <span className="truncate font-medium">{user.name}</span>
                   <span className="text-muted-foreground truncate text-xs">
-                    {user?.email}
+                    {user.email}
                   </span>
                 </div>
               </div>
