@@ -4,18 +4,18 @@ import * as React from "react";
 import {
   IconCamera,
   IconChartBar,
-  IconDashboard,
   IconDatabase,
   IconFileAi,
   IconFileDescription,
   IconFileWord,
   IconFolder,
   IconHelp,
+  IconHome,
   IconListDetails,
+  IconNews,
   IconReport,
   IconSearch,
   IconSettings,
-  IconUsers,
 } from "@tabler/icons-react";
 import Image from "next/image";
 
@@ -44,10 +44,10 @@ const data = {
     {
       title: "Dashboard",
       url: "#",
-      icon: IconDashboard,
+      icon: IconHome,
     },
     {
-      title: "Lifecycle",
+      title: "My Watchlist",
       url: "#",
       icon: IconListDetails,
     },
@@ -57,14 +57,14 @@ const data = {
       icon: IconChartBar,
     },
     {
-      title: "Projects",
+      title: "Filings",
       url: "#",
       icon: IconFolder,
     },
     {
-      title: "Team",
+      title: "News",
       url: "#",
-      icon: IconUsers,
+      icon: IconNews,
     },
   ],
   navClouds: [
@@ -153,7 +153,7 @@ const data = {
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
-    <Sidebar collapsible="offcanvas" {...props}>
+    <Sidebar collapsible={"icon"} {...props}>
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
@@ -164,7 +164,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               <Link href="/" className="flex items-center group">
                 <Image
                   alt="Logo"
-                  className="size-6! pixel-crisp"
+                  className="size-6! pixel-crisp object-cover"
                   height={40}
                   src="/logo.jpeg"
                   width={40}
