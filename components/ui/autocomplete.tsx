@@ -28,6 +28,7 @@ function AutocompleteInput({
   clearProps?: AutocompletePrimitive.Clear.Props;
 }) {
   const sizeValue = (size ?? "default") as "sm" | "default" | "lg" | number;
+  const nativeInputSize = typeof sizeValue === "number" ? sizeValue : undefined;
 
   return (
     <div className="relative not-has-[>*.w-full]:w-fit w-full text-foreground has-disabled:opacity-64">
@@ -50,7 +51,7 @@ function AutocompleteInput({
           className,
         )}
         data-slot="autocomplete-input"
-        render={<Input nativeInput size={sizeValue} />}
+        render={<Input size={nativeInputSize} />}
         {...props}
       />
       {showTrigger && (
@@ -228,7 +229,7 @@ function AutocompleteList({
   ...props
 }: AutocompletePrimitive.List.Props) {
   return (
-    <ScrollArea scrollbarGutter scrollFade>
+    <ScrollArea>
       <AutocompletePrimitive.List
         className={cn(
           "not-empty:scroll-py-1 not-empty:p-1 in-data-has-overflow-y:pe-3",
