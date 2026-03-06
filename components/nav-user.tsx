@@ -68,7 +68,12 @@ export function NavUser() {
     return (
       <SidebarMenu>
         <SidebarMenuItem>
-          <SidebarMenuButton asChild size="lg" data-testid="login-nav-button">
+          <SidebarMenuButton
+            asChild
+            size="lg"
+            data-testid="login-nav-button"
+            variant={"default"}
+          >
             <Link href="/login">
               <UserCircle />
               <span>Login</span>
