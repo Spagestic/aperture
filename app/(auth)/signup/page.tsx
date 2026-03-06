@@ -26,7 +26,7 @@ export default function SignupPage() {
       </div>
       <div className="bg-muted relative hidden lg:block">
         <Image
-          src="/auth.jpeg"
+          src="/shooting_star.png"
           alt="Background Image"
           fill
           className="object-cover"
