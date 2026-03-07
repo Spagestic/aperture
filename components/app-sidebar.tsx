@@ -2,6 +2,8 @@
 
 import * as React from "react";
 import {
+  IconAlertCircle,
+  IconCalendarFilled,
   IconCamera,
   IconChartBar,
   IconDatabase,
@@ -14,11 +16,9 @@ import {
   IconListDetails,
   IconNews,
   IconReport,
-  IconSearch,
   IconSettings,
 } from "@tabler/icons-react";
 import Image from "next/image";
-
 import { NavDocuments } from "@/components/nav-documents";
 import { NavMain } from "@/components/nav-main";
 import { NavSecondary } from "@/components/nav-secondary";
@@ -35,11 +35,6 @@ import {
 import Link from "next/link";
 
 const data = {
-  user: {
-    name: "shadcn",
-    email: "m@example.com",
-    avatar: "/avatars/shadcn.jpg",
-  },
   navMain: [
     {
       title: "Dashboard",
@@ -47,12 +42,12 @@ const data = {
       icon: IconHome,
     },
     {
-      title: "My Watchlist",
+      title: "Watchlist",
       url: "#",
       icon: IconListDetails,
     },
     {
-      title: "Analytics",
+      title: "Companies",
       url: "#",
       icon: IconChartBar,
     },
@@ -65,6 +60,11 @@ const data = {
       title: "News",
       url: "#",
       icon: IconNews,
+    },
+    {
+      title: "Calendar",
+      url: "#",
+      icon: IconCalendarFilled,
     },
   ],
   navClouds: [
@@ -117,19 +117,19 @@ const data = {
   ],
   navSecondary: [
     {
+      title: "Alerts",
+      url: "#",
+      icon: IconAlertCircle,
+    },
+    {
       title: "Settings",
       url: "#",
       icon: IconSettings,
     },
     {
-      title: "Get Help",
+      title: "Help & Support",
       url: "#",
       icon: IconHelp,
-    },
-    {
-      title: "Search",
-      url: "#",
-      icon: IconSearch,
     },
   ],
   documents: [
@@ -160,6 +160,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             <SidebarMenuButton
               asChild
               className="data-[slot=sidebar-menu-button]:p-1.5!"
+              // tooltip={"Aperture"}
             >
               <Link href="/" className="flex items-center group">
                 <Image

@@ -8,6 +8,7 @@ import {
   Lock,
   LogOut,
 } from "lucide-react";
+import { IconUser } from "@tabler/icons-react";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { useAuthActions } from "@convex-dev/auth/react";
@@ -68,14 +69,9 @@ export function NavUser() {
     return (
       <SidebarMenu>
         <SidebarMenuItem>
-          <SidebarMenuButton
-            asChild
-            size="lg"
-            data-testid="login-nav-button"
-            variant={"default"}
-          >
+          <SidebarMenuButton asChild tooltip={"Login"}>
             <Link href="/login">
-              <UserCircle />
+              <IconUser />
               <span>Login</span>
             </Link>
           </SidebarMenuButton>
@@ -93,6 +89,7 @@ export function NavUser() {
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
               data-testid="user-nav-button"
               size="lg"
+              tooltip={user.name || user.email || "User"}
             >
               <Avatar className="h-8 w-8 rounded-lg grayscale">
                 <AvatarImage src={user.image || ""} alt={user.name || ""} />
