@@ -10,7 +10,7 @@ export default function SignupPage() {
           <Link href="/" className="flex items-center gap-1 group">
             <Image
               alt="Logo"
-              className="h-10 w-10 pixel-crisp"
+              className="h-10 w-10 pixel-crisp dark:invert"
               height={40}
               src="/logo_.png"
               width={40}
