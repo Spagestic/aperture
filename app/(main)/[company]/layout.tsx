@@ -12,14 +12,14 @@ import { ReactNode } from "react";
 
 interface CompanyLayoutProps {
   children: ReactNode;
-  params: { company: string };
+  params: Promise<{ company: string }>;
 }
 
-export default function CompanyLayout({
+export default async function CompanyLayout({
   children,
   params,
 }: CompanyLayoutProps) {
-  const { company } = params;
+  const { company } = await params;
   const tabs = [
     { value: "", label: "Overview" },
     { value: "financials", label: "Financials" },
