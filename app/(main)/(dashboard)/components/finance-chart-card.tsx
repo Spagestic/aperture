@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useId } from "react";
 import { ArrowDownRight, ArrowUpRight } from "lucide-react";
 import { Area, AreaChart, ReferenceLine, ResponsiveContainer } from "recharts";
@@ -14,6 +15,8 @@ type FinanceChartCardProps = {
   absoluteChange?: string;
   tone?: "up" | "down" | "neutral";
   data: number[];
+  /** Optional ticker used for linking to the [company] route. */
+  ticker?: string;
   className?: string;
 };
 
@@ -24,6 +27,7 @@ export function FinanceChartCard({
   absoluteChange,
   tone = "down",
   data,
+  ticker,
   className,
 }: FinanceChartCardProps) {
   const id = useId();
@@ -46,7 +50,7 @@ export function FinanceChartCard({
           text: "text-rose-400",
         };
 
-  return (
+  const card = (
     <Card
       className={cn(
         "overflow-hidden rounded-2xl border border-border/50 bg-card/95 shadow-sm pt-4 pb-0",
@@ -125,4 +129,14 @@ export function FinanceChartCard({
       </CardContent>
     </Card>
   );
+
+  if (ticker) {
+    return (
+      <Link href={`/${ticker}`} prefetch={false} className="block">
+        {card}
+      </Link>
+    );
+  }
+
+  return card;
 }

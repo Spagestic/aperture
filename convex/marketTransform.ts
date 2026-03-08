@@ -28,6 +28,8 @@ export type MarketPulseItem = {
   absoluteChange: string;
   tone: Tone;
   data: number[];
+  // Ticker/code used on the frontend for routing to the [company] page.
+  ticker: string;
 };
 
 export type SummaryItem = {
@@ -84,7 +86,9 @@ function sparklineFromChange(changePct: number): number[] {
 
 export function toMarketPulseItem(
   response: StockPriceResponse,
-  title: string
+  title: string,
+  ticker: string,
+  sparkline?: number[]
 ): MarketPulseItem {
   const priceStr =
     response.Price >= 1000
@@ -100,7 +104,11 @@ export function toMarketPulseItem(
     percentChange: formatChange(response.ChangePercentage),
     absoluteChange: absChange,
     tone: toneFromChange(response.ChangePercentage),
-    data: sparklineFromChange(response.ChangePercentage),
+    data:
+      sparkline && sparkline.length > 0
+        ? sparkline
+        : sparklineFromChange(response.ChangePercentage),
+    ticker,
   };
 }
 
