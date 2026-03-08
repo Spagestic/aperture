@@ -140,6 +140,8 @@ Bloomberg Terminal costs $24,000/year. Most investors don't need all its feature
    FIRECRAWL_API_KEY=<your-firecrawl-key>
    ```
 
+   For live market news, earnings, and filings on the dashboard, set **FINNHUB_API_KEY** in the [Convex dashboard](https://dashboard.convex.dev) (Settings → Environment Variables). Get a free key at [finnhub.io](https://finnhub.io). Stock and ETF quotes use [stockprices.dev](https://stockprices.dev) and require no key.
+
 4. **Initialize Convex Auth**
 
    ```bash

@@ -12,7 +12,7 @@ type FinanceChartCardProps = {
   price: string;
   percentChange: string;
   absoluteChange?: string;
-  tone?: "up" | "down";
+  tone?: "up" | "down" | "neutral";
   data: number[];
   className?: string;
 };
