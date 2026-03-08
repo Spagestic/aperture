@@ -19,8 +19,4 @@ export default defineSchema({
   })
     .index("email", ["email"])
     .index("phone", ["phone"]),
-
-  numbers: defineTable({
-    value: v.number(),
-  }),
 });
