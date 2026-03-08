@@ -43,12 +43,12 @@ const data = {
     },
     {
       title: "Watchlist",
-      url: "#",
+      url: "/watchlist",
       icon: IconListDetails,
     },
     {
       title: "Companies",
-      url: "#",
+      url: "/companies",
       icon: IconChartBar,
     },
     {
