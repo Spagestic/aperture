@@ -33,7 +33,7 @@ export default function CompanyLayout({
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
         {/* Left Side */}
         <div className="w-full">
-          <Tabs defaultValue={"overview"} className="w-full">
+          <Tabs defaultValue={""} className="w-full">
             <TabsList variant={"line"}>
               {tabs.map((tab) => (
                 <TabsTrigger asChild key={tab.value} value={tab.value}>
