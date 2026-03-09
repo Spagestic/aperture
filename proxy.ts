@@ -8,6 +8,9 @@ import { NextResponse } from "next/server";
 const isSignInPage = createRouteMatcher(["/login", "/signup"]);
 const isProtectedRoute = createRouteMatcher(["/dashboard(.*)"]);
 const isProtectedApiRoute = createRouteMatcher(["/api(.*)"]);
+const isPublicApiRoute = createRouteMatcher([
+  "/api/company-financials(.*)",
+]);
 
 export default convexAuthNextjsMiddleware(async (request, { convexAuth }) => {
   const isAuthenticated = await convexAuth.isAuthenticated();
@@ -23,7 +26,7 @@ export default convexAuthNextjsMiddleware(async (request, { convexAuth }) => {
   }
 
   // Return 401 for unauthenticated API requests
-  if (isProtectedApiRoute(request) && !isAuthenticated) {
+  if (isProtectedApiRoute(request) && !isPublicApiRoute(request) && !isAuthenticated) {
     return NextResponse.json(
       { error: "Authentication required" },
       { status: 401 },
