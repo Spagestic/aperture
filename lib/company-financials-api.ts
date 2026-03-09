@@ -15,14 +15,20 @@ const AV_BASE = "https://www.alphavantage.co/query";
 
 type AVReport = Record<string, string | undefined>;
 
-function parseNum(value: string | undefined, scaleToMillions = false): number | null {
+function parseNum(
+  value: string | undefined,
+  scaleToMillions = false,
+): number | null {
   if (value === undefined || value === "" || value === "None") return null;
   const n = Number(value);
   if (!Number.isFinite(n)) return null;
   return scaleToMillions ? n / 1e6 : n;
 }
 
-function periodFromFiscalDate(fiscalDateEnding: string, granularity: "annual" | "quarterly"): string {
+function periodFromFiscalDate(
+  fiscalDateEnding: string,
+  granularity: "annual" | "quarterly",
+): string {
   const [y, m] = fiscalDateEnding.split("-");
   if (granularity === "annual") return y ?? fiscalDateEnding;
   const month = Number(m ?? 0);
@@ -34,9 +40,11 @@ function buildStatementRows(
   reports: AVReport[],
   granularity: "annual" | "quarterly",
   fieldToLabel: Record<string, { label: string; format?: "percent" | "ratio" }>,
-  scaleToMillions = true
+  scaleToMillions = true,
 ): StatementRow[] {
-  const periods = reports.map((r) => periodFromFiscalDate(r.fiscalDateEnding ?? "", granularity));
+  const periods = reports.map((r) =>
+    periodFromFiscalDate(r.fiscalDateEnding ?? "", granularity),
+  );
   return Object.entries(fieldToLabel).map(([field, { label, format }]) => ({
     label,
     ...(format && { format }),
@@ -46,15 +54,18 @@ function buildStatementRows(
         const raw = r[field];
         const value = parseNum(
           typeof raw === "string" ? raw : undefined,
-          scaleToMillions && format !== "ratio"
+          scaleToMillions && format !== "ratio",
         );
         return [period, value];
-      })
+      }),
     ) as Record<string, number | null>,
   }));
 }
 
-const INCOME_FIELDS: Record<string, { label: string; format?: "percent" | "ratio" }> = {
+const INCOME_FIELDS: Record<
+  string,
+  { label: string; format?: "percent" | "ratio" }
+> = {
   totalRevenue: { label: "Total Revenue" },
   costOfRevenue: { label: "Cost of Sales" },
   grossProfit: { label: "Gross Profit" },
@@ -66,10 +77,15 @@ const INCOME_FIELDS: Record<string, { label: string; format?: "percent" | "ratio
 };
 const INCOME_FIELDS_FILTERED = Object.entries(INCOME_FIELDS)
   .filter(([, v]) => v.label !== "_currency")
-  .reduce((acc, [k, v]) => ({ ...acc, [k]: v }), {} as Record<string, { label: string; format?: "percent" | "ratio" }>);
+  .reduce(
+    (acc, [k, v]) => ({ ...acc, [k]: v }),
+    {} as Record<string, { label: string; format?: "percent" | "ratio" }>,
+  );
 
 const BALANCE_FIELDS: Record<string, { label: string }> = {
-  cashAndCashEquivalentsAtCarryingValue: { label: "Total Cash & Cash Equivalents" },
+  cashAndCashEquivalentsAtCarryingValue: {
+    label: "Total Cash & Cash Equivalents",
+  },
   shortTermInvestments: { label: "Short-Term Investments" },
   currentNetReceivables: { label: "Accounts Receivable" },
   inventory: { label: "Inventories" },
@@ -82,7 +98,9 @@ const BALANCE_FIELDS: Record<string, { label: string }> = {
 
 const CASHFLOW_FIELDS: Record<string, { label: string }> = {
   netIncome: { label: "Net Income" },
-  depreciationDepletionAndAmortization: { label: "Depreciation & Amortization" },
+  depreciationDepletionAndAmortization: {
+    label: "Depreciation & Amortization",
+  },
   cashflowFromInvestment: { label: "Cash from Investing Activities" },
   cashflowFromFinancing: { label: "Cash from Financing Activities" },
   operatingCashflow: { label: "Cash from Operating Activities" },
@@ -94,9 +112,11 @@ function cashflowRowFromReports(
   granularity: "annual" | "quarterly",
   field: string,
   label: string,
-  negate = false
+  negate = false,
 ): StatementRow {
-  const periods = reports.map((r) => periodFromFiscalDate(r.fiscalDateEnding ?? "", granularity));
+  const periods = reports.map((r) =>
+    periodFromFiscalDate(r.fiscalDateEnding ?? "", granularity),
+  );
   const values: Record<string, number | null> = {};
   reports.forEach((r, i) => {
     const period = periods[i];
@@ -106,12 +126,17 @@ function cashflowRowFromReports(
   return { label, values };
 }
 
-async function fetchAlphaVantage<T>(params: Record<string, string>): Promise<T> {
+async function fetchAlphaVantage<T>(
+  params: Record<string, string>,
+): Promise<T> {
   const url = new URL(AV_BASE);
   Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v));
   const res = await fetch(url.toString(), { next: { revalidate: 3600 } });
   if (!res.ok) throw new Error(`Alpha Vantage error: ${res.status}`);
-  const data = (await res.json()) as T & { Note?: string; "Error Message"?: string };
+  const data = (await res.json()) as T & {
+    Note?: string;
+    "Error Message"?: string;
+  };
   if (data.Note) throw new Error(data.Note);
   if (data["Error Message"]) throw new Error(data["Error Message"]);
   return data as T;
@@ -139,11 +164,31 @@ type AVOverviewResponse = {
   Symbol?: string;
   Name?: string;
   Exchange?: string;
+  Country?: string;
+  OfficialSite?: string;
   Sector?: string;
   MarketCapitalization?: string;
   SharesOutstanding?: string;
   Currency?: string;
 };
+
+function domainFromOfficialSite(
+  site: string | undefined,
+  fallback: string,
+): string {
+  if (!site) return fallback;
+
+  try {
+    const normalized =
+      site.startsWith("http://") || site.startsWith("https://")
+        ? site
+        : `https://${site}`;
+    const hostname = new URL(normalized).hostname.toLowerCase();
+    return hostname.replace(/^www\./, "") || fallback;
+  } catch {
+    return fallback;
+  }
+}
 
 function buildDataset(
   annualIncome: AVReport[],
@@ -153,10 +198,14 @@ function buildDataset(
   annualCashflow: AVReport[],
   quarterlyCashflow: AVReport[],
   overview: AVOverviewResponse,
-  ticker: string
+  ticker: string,
 ): Record<PeriodView, FinancialDataset> {
-  const annualPeriods = annualIncome.map((r) => periodFromFiscalDate(r.fiscalDateEnding ?? "", "annual"));
-  const quarterlyPeriods = quarterlyIncome.map((r) => periodFromFiscalDate(r.fiscalDateEnding ?? "", "quarterly"));
+  const annualPeriods = annualIncome.map((r) =>
+    periodFromFiscalDate(r.fiscalDateEnding ?? "", "annual"),
+  );
+  const quarterlyPeriods = quarterlyIncome.map((r) =>
+    periodFromFiscalDate(r.fiscalDateEnding ?? "", "quarterly"),
+  );
 
   const marketCap = parseNum(overview.MarketCapitalization, false) ?? 0;
   const sharesRaw = parseNum(overview.SharesOutstanding, false) ?? 0;
@@ -172,41 +221,131 @@ function buildDataset(
   const priceQuarterly = pricePerShare;
   const sharesForDataset = sharesOutstandingThousands;
 
-  const incomeAnnual = buildStatementRows(annualIncome, "annual", INCOME_FIELDS_FILTERED);
-  const incomeQuarterly = buildStatementRows(quarterlyIncome, "quarterly", INCOME_FIELDS_FILTERED);
-  const balanceAnnual = buildStatementRows(annualBalance, "annual", BALANCE_FIELDS);
-  const balanceQuarterly = buildStatementRows(quarterlyBalance, "quarterly", BALANCE_FIELDS);
+  const incomeAnnual = buildStatementRows(
+    annualIncome,
+    "annual",
+    INCOME_FIELDS_FILTERED,
+  );
+  const incomeQuarterly = buildStatementRows(
+    quarterlyIncome,
+    "quarterly",
+    INCOME_FIELDS_FILTERED,
+  );
+  const balanceAnnual = buildStatementRows(
+    annualBalance,
+    "annual",
+    BALANCE_FIELDS,
+  );
+  const balanceQuarterly = buildStatementRows(
+    quarterlyBalance,
+    "quarterly",
+    BALANCE_FIELDS,
+  );
   const cashflowAnnual = [
     cashflowRowFromReports(annualCashflow, "annual", "netIncome", "Net Income"),
-    cashflowRowFromReports(annualCashflow, "annual", "depreciationDepletionAndAmortization", "Depreciation & Amortization"),
-    cashflowRowFromReports(annualCashflow, "annual", "operatingCashflow", "Cash from Operating Activities"),
-    cashflowRowFromReports(annualCashflow, "annual", "capitalExpenditures", "Capital Expenditure", true),
-    cashflowRowFromReports(annualCashflow, "annual", "cashflowFromInvestment", "Cash from Investing Activities"),
-    cashflowRowFromReports(annualCashflow, "annual", "cashflowFromFinancing", "Cash from Financing Activities"),
+    cashflowRowFromReports(
+      annualCashflow,
+      "annual",
+      "depreciationDepletionAndAmortization",
+      "Depreciation & Amortization",
+    ),
+    cashflowRowFromReports(
+      annualCashflow,
+      "annual",
+      "operatingCashflow",
+      "Cash from Operating Activities",
+    ),
+    cashflowRowFromReports(
+      annualCashflow,
+      "annual",
+      "capitalExpenditures",
+      "Capital Expenditure",
+      true,
+    ),
+    cashflowRowFromReports(
+      annualCashflow,
+      "annual",
+      "cashflowFromInvestment",
+      "Cash from Investing Activities",
+    ),
+    cashflowRowFromReports(
+      annualCashflow,
+      "annual",
+      "cashflowFromFinancing",
+      "Cash from Financing Activities",
+    ),
   ];
   const cashflowQuarterly = [
-    cashflowRowFromReports(quarterlyCashflow, "quarterly", "netIncome", "Net Income"),
-    cashflowRowFromReports(quarterlyCashflow, "quarterly", "depreciationDepletionAndAmortization", "Depreciation & Amortization"),
-    cashflowRowFromReports(quarterlyCashflow, "quarterly", "operatingCashflow", "Cash from Operating Activities"),
-    cashflowRowFromReports(quarterlyCashflow, "quarterly", "capitalExpenditures", "Capital Expenditure", true),
-    cashflowRowFromReports(quarterlyCashflow, "quarterly", "cashflowFromInvestment", "Cash from Investing Activities"),
-    cashflowRowFromReports(quarterlyCashflow, "quarterly", "cashflowFromFinancing", "Cash from Financing Activities"),
+    cashflowRowFromReports(
+      quarterlyCashflow,
+      "quarterly",
+      "netIncome",
+      "Net Income",
+    ),
+    cashflowRowFromReports(
+      quarterlyCashflow,
+      "quarterly",
+      "depreciationDepletionAndAmortization",
+      "Depreciation & Amortization",
+    ),
+    cashflowRowFromReports(
+      quarterlyCashflow,
+      "quarterly",
+      "operatingCashflow",
+      "Cash from Operating Activities",
+    ),
+    cashflowRowFromReports(
+      quarterlyCashflow,
+      "quarterly",
+      "capitalExpenditures",
+      "Capital Expenditure",
+      true,
+    ),
+    cashflowRowFromReports(
+      quarterlyCashflow,
+      "quarterly",
+      "cashflowFromInvestment",
+      "Cash from Investing Activities",
+    ),
+    cashflowRowFromReports(
+      quarterlyCashflow,
+      "quarterly",
+      "cashflowFromFinancing",
+      "Cash from Financing Activities",
+    ),
   ];
 
-  const addDilutedEps = (income: StatementRow[], reports: AVReport[], gran: "annual" | "quarterly"): StatementRow[] => {
-    const periods = reports.map((r) => periodFromFiscalDate(r.fiscalDateEnding ?? "", gran));
+  const addDilutedEps = (
+    income: StatementRow[],
+    reports: AVReport[],
+    gran: "annual" | "quarterly",
+  ): StatementRow[] => {
+    const periods = reports.map((r) =>
+      periodFromFiscalDate(r.fiscalDateEnding ?? "", gran),
+    );
     const epsRow: StatementRow = {
       label: "Diluted EPS",
       format: "ratio",
       values: Object.fromEntries(
-        reports.map((r, i) => [periods[i], parseNum(r.reportedEPS as string) ?? null])
+        reports.map((r, i) => [
+          periods[i],
+          parseNum(r.reportedEPS as string) ?? null,
+        ]),
       ),
     };
     return [...income, epsRow];
   };
 
-  const incomeAnnualWithEps = addDilutedEps(incomeAnnual, annualIncome, "annual");
-  const incomeQuarterlyWithEps = addDilutedEps(incomeQuarterly, quarterlyIncome, "quarterly");
+  const incomeAnnualWithEps = addDilutedEps(
+    incomeAnnual,
+    annualIncome,
+    "annual",
+  );
+  const incomeQuarterlyWithEps = addDilutedEps(
+    incomeQuarterly,
+    quarterlyIncome,
+    "quarterly",
+  );
 
   const annual: FinancialDataset = {
     periods: annualPeriods,
@@ -252,7 +391,7 @@ function buildDataset(
                 const v2 = q2 != null ? row.values[q2] : null;
                 const sum = (v1 ?? 0) + (v2 ?? 0);
                 return [p, row.format === "ratio" ? (v2 ?? v1) : sum || null];
-              })
+              }),
             ) as Record<string, number | null>,
           }))
         : [],
@@ -262,9 +401,12 @@ function buildDataset(
             ...row,
             values: Object.fromEntries(
               semiannualPeriodsSlice.map((p, idx) => {
-                const q2 = quarterlyPeriods[Math.min(idx * 2 + 1, quarterlyPeriods.length - 1)];
-                return [p, q2 != null ? row.values[q2] ?? null : null];
-              })
+                const q2 =
+                  quarterlyPeriods[
+                    Math.min(idx * 2 + 1, quarterlyPeriods.length - 1)
+                  ];
+                return [p, q2 != null ? (row.values[q2] ?? null) : null];
+              }),
             ) as Record<string, number | null>,
           }))
         : [],
@@ -278,7 +420,7 @@ function buildDataset(
 
 export async function fetchCompanyFinancials(
   ticker: string,
-  apiKey: string
+  apiKey: string,
 ): Promise<CompanyFinancialPayload> {
   const symbol = ticker.toUpperCase();
 
@@ -321,6 +463,11 @@ export async function fetchCompanyFinancials(
     name: overviewRes.Name ?? symbol,
     ticker: symbol,
     exchange: overviewRes.Exchange ?? "—",
+    country: overviewRes.Country ?? "—",
+    logoDomain: domainFromOfficialSite(
+      overviewRes.OfficialSite,
+      ticker.toLowerCase(),
+    ),
     sector: overviewRes.Sector ?? "—",
     sourceLabel: "Alpha Vantage",
     lastUpdated: new Date().toISOString().slice(0, 10),
@@ -334,7 +481,7 @@ export async function fetchCompanyFinancials(
     annualCashflow,
     quarterlyCashflow,
     overviewRes,
-    symbol
+    symbol,
   );
 
   return {
