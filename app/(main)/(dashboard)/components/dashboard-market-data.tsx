@@ -9,6 +9,7 @@ import {
   upcomingEvents as fallbackEvents,
   watchlist as fallbackWatchlist,
 } from "./data";
+import { DashboardSkeleton } from "./dashboard-skeleton";
 import { MarketPulseGrid } from "./market-pulse-grid";
 import { MarketSummaryCard } from "./market-summary-card";
 import { DashboardRightRail } from "./right-rail";
@@ -22,6 +23,7 @@ const FALLBACK_PULSE = [
     absoluteChange: "-$91.50",
     tone: "down" as const,
     data: [100, 99.7, 99.2, 98.8, 98.5, 98.2, 98.0, 97.8, 97.7, 97.6],
+    ticker: "ESUSD",
   },
   {
     title: "NASDAQ Fut.",
@@ -30,6 +32,7 @@ const FALLBACK_PULSE = [
     absoluteChange: "-$379.25",
     tone: "down" as const,
     data: [100, 99.6, 99.1, 98.7, 98.3, 98.0, 97.7, 97.5, 97.3, 97.1],
+    ticker: "QQQ",
   },
   {
     title: "Dow Futures",
@@ -38,6 +41,7 @@ const FALLBACK_PULSE = [
     absoluteChange: "-$466.00",
     tone: "down" as const,
     data: [100, 99.9, 99.7, 99.5, 99.2, 99.0, 98.8, 98.7, 98.6, 98.5],
+    ticker: "DIA",
   },
   {
     title: "VIX",
@@ -46,6 +50,7 @@ const FALLBACK_PULSE = [
     absoluteChange: "+5.74",
     tone: "up" as const,
     data: [100, 99.8, 99.7, 99.7, 99.9, 100.2, 100.8, 101.5, 102.7, 124.2],
+    ticker: "VIX",
   },
 ];
 
@@ -92,16 +97,15 @@ export function DashboardMarketData() {
     ? data.latestFilings
     : fallbackFilings;
 
+  if (loading) {
+    return <DashboardSkeleton />;
+  }
+
   return (
     <>
       <div className="@container/main flex flex-1 flex-col px-4 pb-40 pt-4 md:px-6 md:pb-44 md:pt-6">
         <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
           <div className="mx-auto flex w-full max-w-7xl flex-col gap-6">
-            {loading && (
-              <p className="text-xs text-muted-foreground">
-                Updating market data...
-              </p>
-            )}
             {error && (
               <p className="text-xs text-amber-600 dark:text-amber-400">
                 Using cached data. Set FINNHUB_API_KEY in Convex for news and

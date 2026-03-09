@@ -7,6 +7,8 @@ export type MarketPulseItem = {
   absoluteChange: string;
   tone: "up" | "down" | "neutral";
   data: number[];
+  /** Ticker/code used for routing to the [company] page. */
+  ticker: string;
 };
 
 type MarketPulseGridProps = {
@@ -19,13 +21,14 @@ export function MarketPulseGrid({ items }: MarketPulseGridProps) {
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         {items.map((item) => (
           <FinanceChartCard
-            key={item.title}
+            key={item.ticker || item.title}
             title={item.title}
             price={item.price}
             percentChange={item.percentChange}
             absoluteChange={item.absoluteChange}
             tone={item.tone}
             data={item.data}
+            ticker={item.ticker}
           />
         ))}
       </div>

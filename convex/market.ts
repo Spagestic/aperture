@@ -21,6 +21,12 @@ import {
 const STOCK_PRICES_BASE = "https://stockprices.dev";
 const FINNHUB_BASE = "https://finnhub.io/api/v1";
 
+type FinnhubCandleResponse = {
+  c: number[];
+  t: number[];
+  s: string;
+};
+
 async function fetchStockPrice(
   ticker: string,
   type: "stocks" | "etfs"
@@ -43,11 +49,16 @@ async function fetchFinnhub<T>(
 }
 
 const WATCHLIST_TICKERS = ["MSFT", "AAPL", "NVDA", "AMZN"];
-const MARKET_PULSE_ETFS: { ticker: string; title: string }[] = [
-  { ticker: "SPY", title: "S&P Futures" },
-  { ticker: "QQQ", title: "NASDAQ Fut." },
-  { ticker: "DIA", title: "Dow Futures" },
-  { ticker: "VXX", title: "VIX" },
+const MARKET_PULSE_ETFS: {
+  dataTicker: string;
+  routeTicker: string;
+  title: string;
+}[] = [
+  // Use SPY for data but route to the ESUSD futures page.
+  { dataTicker: "SPY", routeTicker: "ESUSD", title: "S&P Futures" },
+  { dataTicker: "QQQ", routeTicker: "QQQ", title: "NASDAQ Fut." },
+  { dataTicker: "DIA", routeTicker: "DIA", title: "Dow Futures" },
+  { dataTicker: "VXX", routeTicker: "VXX", title: "VIX" },
 ];
 
 /**
@@ -66,15 +77,39 @@ export const getWatchlistQuotes = action({
 });
 
 /**
- * Fetch market pulse (SPY, QQQ, DIA, VXX) from stockprices.dev.
+ * Fetch market pulse (SPY, QQQ, DIA, VXX) from stockprices.dev
+ * and augment with recent daily candles from Finnhub when available.
  */
 export const getMarketPulse = action({
   args: {},
   handler: async (): Promise<MarketPulseItem[]> => {
     const results: MarketPulseItem[] = [];
-    for (const { ticker, title } of MARKET_PULSE_ETFS) {
-      const data = await fetchStockPrice(ticker, "etfs");
-      if (data) results.push(toMarketPulseItem(data, title));
+    const token = process.env.FINNHUB_API_KEY;
+    const nowSec = Math.floor(Date.now() / 1000);
+    const fromSec = nowSec - 60 * 60 * 24 * 30; // ~30 days of daily candles
+
+    for (const { dataTicker, routeTicker, title } of MARKET_PULSE_ETFS) {
+      const [quote, candles] = await Promise.all([
+        fetchStockPrice(dataTicker, "etfs"),
+        token
+          ? fetchFinnhub<FinnhubCandleResponse>(
+              `/stock/candle?symbol=${dataTicker}&resolution=D&from=${fromSec}&to=${nowSec}`,
+              token
+            )
+          : Promise.resolve(null),
+      ]);
+      if (!quote) continue;
+
+      let sparkline: number[] | undefined;
+      if (candles && candles.s === "ok" && Array.isArray(candles.c)) {
+        const closes = candles.c;
+        const slice =
+          closes.length > 10 ? closes.slice(closes.length - 10) : closes;
+        // Use closes directly for sparkline; FinanceChartCard handles scaling.
+        sparkline = slice;
+      }
+
+      results.push(toMarketPulseItem(quote, title, routeTicker, sparkline));
     }
     return results;
   },
@@ -169,9 +204,31 @@ export const getDashboardData = action({
         })(),
         (async () => {
           const results: MarketPulseItem[] = [];
-          for (const { ticker, title } of MARKET_PULSE_ETFS) {
-            const data = await fetchStockPrice(ticker, "etfs");
-            if (data) results.push(toMarketPulseItem(data, title));
+          const token = process.env.FINNHUB_API_KEY;
+          const nowSec = Math.floor(Date.now() / 1000);
+          const fromSec = nowSec - 60 * 60 * 24 * 30;
+
+          for (const { dataTicker, routeTicker, title } of MARKET_PULSE_ETFS) {
+            const [quote, candles] = await Promise.all([
+              fetchStockPrice(dataTicker, "etfs"),
+              token
+                ? fetchFinnhub<FinnhubCandleResponse>(
+                    `/stock/candle?symbol=${dataTicker}&resolution=D&from=${fromSec}&to=${nowSec}`,
+                    token
+                  )
+                : Promise.resolve(null),
+            ]);
+            if (!quote) continue;
+
+            let sparkline: number[] | undefined;
+            if (candles && candles.s === "ok" && Array.isArray(candles.c)) {
+              const closes = candles.c;
+              const slice =
+                closes.length > 10 ? closes.slice(closes.length - 10) : closes;
+              sparkline = slice;
+            }
+
+            results.push(toMarketPulseItem(quote, title, routeTicker, sparkline));
           }
           return results;
         })(),

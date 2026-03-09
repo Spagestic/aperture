@@ -4,7 +4,6 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { Card, CardContent } from "@/components/ui/card";
 
 import type { SummaryItem } from "./data";
 
@@ -23,27 +22,26 @@ export function MarketSummaryCard({ items }: MarketSummaryCardProps) {
           Updated 2 mins ago
         </span>
       </div>
-      <Card className="p-0">
-        <CardContent className="pt-0 px-4">
-          <Accordion
-            type="single"
-            collapsible
-            defaultValue={items[0]?.id}
-            className="w-full py-0"
+
+      <Accordion
+        type="single"
+        collapsible
+        defaultValue={items[0]?.id}
+        className="w-full rounded-lg border"
+      >
+        {items.map((item) => (
+          <AccordionItem
+            key={item.id}
+            value={item.id}
+            className="border-b px-4 last:border-b-0"
           >
-            {items.map((item) => (
-              <AccordionItem key={item.id} value={item.id}>
-                <AccordionTrigger className="text-left text-sm font-medium">
-                  {item.title}
-                </AccordionTrigger>
-                <AccordionContent className="text-sm leading-6 text-muted-foreground">
-                  {item.summary}
-                </AccordionContent>
-              </AccordionItem>
-            ))}
-          </Accordion>
-        </CardContent>
-      </Card>
+            <AccordionTrigger>{item.title}</AccordionTrigger>
+            <AccordionContent className="text-sm leading-6 text-muted-foreground">
+              {item.summary}
+            </AccordionContent>
+          </AccordionItem>
+        ))}
+      </Accordion>
     </div>
   );
 }
