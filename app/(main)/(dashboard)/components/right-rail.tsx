@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { CalendarDays, FileText } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
@@ -18,6 +19,10 @@ type DashboardRightRailProps = {
   upcomingEvents: UpcomingEvent[];
   latestFilings: FilingItem[];
 };
+
+function companySlugFromTicker(ticker: string) {
+  return ticker.toLowerCase().replace(/\./g, "-");
+}
 
 export function DashboardRightRail({
   watchlist,
@@ -40,8 +45,18 @@ export function DashboardRightRail({
               {index > 0 && <Separator className="mb-4" />}
               <div className="flex items-center justify-between gap-3">
                 <div className="min-w-0">
-                  <p className="truncate text-sm font-medium">{item.company}</p>
-                  <p className="text-xs text-muted-foreground">{item.ticker}</p>
+                  <Link
+                    href={`/${companySlugFromTicker(item.ticker)}`}
+                    className="block truncate text-sm font-medium hover:underline"
+                  >
+                    {item.company}
+                  </Link>
+                  <Link
+                    href={`/${companySlugFromTicker(item.ticker)}/financials`}
+                    className="text-xs text-muted-foreground hover:underline"
+                  >
+                    {item.ticker}
+                  </Link>
                 </div>
 
                 <div className="text-right">
