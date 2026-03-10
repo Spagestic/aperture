@@ -1,22 +1,24 @@
 import { NextResponse } from 'next/server'
 
-const FINNHUB_KEY = process.env.FINNHUB_API_KEY
+const FINNHUB_KEY = process.env.NEXT_PUBLIC_FINNHUB_API_KEY
 
 export async function GET(
   request: Request,
-  { params }: { params: { ticker: string } }
+  { params }: { params: Promise<{ ticker: string }> }
 ) {
-  const { ticker } = params
+  const { ticker } = await params
   const { searchParams } = new URL(request.url)
   const freq = searchParams.get('freq') || 'annual'
 
   try {
     const [metricsRes, financialsRes] = await Promise.all([
       fetch(
-        `https://finnhub.io/api/v1/stock/metric?symbol=${ticker}&metric=all&token=${FINNHUB_KEY}`
+        `https://finnhub.io/api/v1/stock/metric?symbol=${ticker}&metric=all&token=${FINNHUB_KEY}`,
+        { next: { revalidate: 3600 } } // ✅ cache 1 hour
       ),
       fetch(
-        `https://finnhub.io/api/v1/stock/financials-reported?symbol=${ticker}&freq=${freq}&token=${FINNHUB_KEY}`
+        `https://finnhub.io/api/v1/stock/financials-reported?symbol=${ticker}&freq=${freq}&token=${FINNHUB_KEY}`,
+        { next: { revalidate: 86400 } } // ✅ cache 24 hours (filings don't change often)
       ),
     ])
 
