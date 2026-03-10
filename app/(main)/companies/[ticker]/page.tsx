@@ -7,6 +7,8 @@ import { DashboardRightRail } from "../../(dashboard)/components/right-rail";
 import { latestFilings, upcomingEvents, watchlist } from "../../(dashboard)/components/data";
 import { getQuote, getCompanyProfile } from "@/lib/finnhub";
 import { AnalysisTab } from "@/components/analysis-tab";
+import { AnalysisTab } from "@/components/analysis-tab";
+import Financials from "@/components/company/Financials"; // ← add this
 
 interface CompanyPageProps {
   params: { ticker: string };
@@ -112,16 +114,8 @@ export default async function Page({ params }: CompanyPageProps) {
             </TabsContent>
 
             <TabsContent value="financials">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Financials</CardTitle>
-                  <CardDescription>Detailed financials coming soon.</CardDescription>
-                </CardHeader>
-                <CardContent className="text-sm text-muted-foreground">
-                  Powered by Mistral OCR pipeline — coming next.
-                </CardContent>
-              </Card>
-            </TabsContent>
+  <Financials ticker={ticker} />
+</TabsContent>
 
             <TabsContent value="reports">
               <Card>
