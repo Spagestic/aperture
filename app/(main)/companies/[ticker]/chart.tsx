@@ -13,9 +13,13 @@ const chartConfig = {
 } satisfies ChartConfig;
 
 interface CandleData {
-  c: number[];
-  t: number[];
   s: string;
+  c?: number[];
+  t?: number[];
+  o?: number[];
+  h?: number[];
+  l?: number[];
+  v?: number[];
 }
 
 interface ChartLineInteractiveProps {
@@ -25,12 +29,12 @@ interface ChartLineInteractiveProps {
 
 export function ChartLineInteractive({ candles, ticker }: ChartLineInteractiveProps) {
   const chartData = React.useMemo(() => {
-    if (!candles || candles.s !== "ok") return [];
-    return candles.t.map((timestamp, i) => ({
-      date: new Date(timestamp * 1000).toISOString().split("T")[0],
-      price: candles.c[i],
-    }));
-  }, [candles]);
+  if (!candles || candles.s !== "ok" || !candles.t || !candles.c) return [];
+  return candles.t.map((timestamp, i) => ({
+    date: new Date(timestamp * 1000).toISOString().split("T")[0],
+    price: candles.c![i],
+  }));
+}, [candles]);
 
   return (
     <Card className="py-4 sm:py-0">
