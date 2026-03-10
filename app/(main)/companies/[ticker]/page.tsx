@@ -6,7 +6,7 @@ import { ChartLineInteractive } from "./chart";
 import { DashboardRightRail } from "../../(dashboard)/components/right-rail";
 import { latestFilings, upcomingEvents, watchlist } from "../../(dashboard)/components/data";
 import { getQuote, getCompanyProfile } from "@/lib/finnhub";
-import { AnalysisTab } from "./analysis-tab";
+import { AnalysisTab } from "@/components/analysis-tab";
 
 interface CompanyPageProps {
   params: { ticker: string };
@@ -135,9 +135,16 @@ export default async function Page({ params }: CompanyPageProps) {
               </Card>
             </TabsContent>
 
-            <TabsContent value="analysis">
-              <AnalysisTab ticker={ticker} />
-            </TabsContent>
+           <TabsContent value="analysis">
+  <AnalysisTab
+    ticker={ticker}
+    price={quote.c ?? 0}
+    high={quote.h ?? 0}
+    low={quote.l ?? 0}
+    open={quote.o ?? 0}
+    prevClose={quote.pc ?? 0}
+  />
+</TabsContent>
 
           </Tabs>
         </div>
