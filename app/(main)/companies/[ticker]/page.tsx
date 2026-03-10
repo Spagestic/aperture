@@ -5,7 +5,8 @@ import { Badge } from "@/components/ui/badge";
 import { ChartLineInteractive } from "./chart";
 import { DashboardRightRail } from "../../(dashboard)/components/right-rail";
 import { latestFilings, upcomingEvents, watchlist } from "../../(dashboard)/components/data";
-import { getCandles, getQuote, getCompanyProfile } from "@/lib/finnhub";
+import { getQuote, getCompanyProfile } from "@/lib/finnhub";
+import { AnalysisTab } from "./analysis-tab";
 
 interface CompanyPageProps {
   params: { ticker: string };
@@ -14,13 +15,35 @@ interface CompanyPageProps {
 export default async function Page({ params }: CompanyPageProps) {
   const { ticker } = await params;
 
-  const [quote, profile, candles] = await Promise.all([
-    getQuote(ticker),
-    getCompanyProfile(ticker),
-    getCandles(ticker),
-  ]);
+  let quote, profile;
 
-  const isPositive = quote.d >= 0;
+  try {
+    [quote, profile] = await Promise.all([
+      getQuote(ticker),
+      getCompanyProfile(ticker),
+    ]);
+  } catch (error) {
+    console.error("Failed to fetch company data:", error);
+    return (
+      <div className="flex items-center justify-center h-full p-10">
+        <p className="text-muted-foreground">
+          Could not load data for <strong>{ticker}</strong>. Try again later.
+        </p>
+      </div>
+    );
+  }
+
+  if (!quote || !profile) {
+    return (
+      <div className="flex items-center justify-center h-full p-10">
+        <p className="text-muted-foreground">
+          No data found for <strong>{ticker}</strong>.
+        </p>
+      </div>
+    );
+  }
+
+  const isPositive = (quote.d ?? 0) >= 0;
 
   return (
     <div className="@container/main flex flex-1 flex-col px-4 pb-40 pt-4 md:px-6 md:pb-44 md:pt-6">
@@ -45,7 +68,7 @@ export default async function Page({ params }: CompanyPageProps) {
           <div className="flex items-baseline gap-3">
             <span className="text-4xl font-bold">${quote.c?.toFixed(2)}</span>
             <Badge variant={isPositive ? "default" : "destructive"}>
-              {isPositive ? "▲" : "▼"} {Math.abs(quote.d)?.toFixed(2)} ({Math.abs(quote.dp)?.toFixed(2)}%)
+              {isPositive ? "▲" : "▼"} {Math.abs(quote.d ?? 0)?.toFixed(2)} ({Math.abs(quote.dp ?? 0)?.toFixed(2)}%)
             </Badge>
           </div>
 
@@ -60,7 +83,7 @@ export default async function Page({ params }: CompanyPageProps) {
 
             <TabsContent value="overview" className="flex flex-col gap-4">
               {/* Chart */}
-              <ChartLineInteractive candles={candles} ticker={ticker} />
+              <ChartLineInteractive ticker={ticker} />
 
               {/* Key Metrics */}
               <div className="grid grid-cols-3 gap-4">
@@ -69,8 +92,16 @@ export default async function Page({ params }: CompanyPageProps) {
                   { label: "Prev Close", value: `$${quote.pc?.toFixed(2)}` },
                   { label: "High", value: `$${quote.h?.toFixed(2)}` },
                   { label: "Low", value: `$${quote.l?.toFixed(2)}` },
-                  { label: "Market Cap", value: profile.marketCapitalization ? `$${(profile.marketCapitalization / 1000).toFixed(2)}B` : "N/A" },
-                  { label: "Employees", value: profile.employeeTotal?.toLocaleString() ?? "N/A" },
+                  {
+                    label: "Market Cap",
+                    value: profile.marketCapitalization
+                      ? `$${(profile.marketCapitalization / 1000).toFixed(2)}B`
+                      : "N/A",
+                  },
+                  {
+                    label: "Employees",
+                    value: profile.employeeTotal?.toLocaleString() ?? "N/A",
+                  },
                 ].map((item) => (
                   <div key={item.label} className="rounded-lg border p-3">
                     <p className="text-xs text-muted-foreground">{item.label}</p>
@@ -105,16 +136,9 @@ export default async function Page({ params }: CompanyPageProps) {
             </TabsContent>
 
             <TabsContent value="analysis">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Analysis</CardTitle>
-                  <CardDescription>AI-powered stock analysis.</CardDescription>
-                </CardHeader>
-                <CardContent className="text-sm text-muted-foreground">
-                  Mistral AI analysis coming soon.
-                </CardContent>
-              </Card>
+              <AnalysisTab ticker={ticker} />
             </TabsContent>
+
           </Tabs>
         </div>
 
