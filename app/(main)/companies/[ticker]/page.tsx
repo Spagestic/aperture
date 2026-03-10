@@ -1,27 +1,20 @@
 import React from "react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ChartLineInteractive } from "./chart";
 import { DashboardRightRail } from "../../(dashboard)/components/right-rail";
-import {
-  latestFilings,
-  upcomingEvents,
-  watchlist,
-} from "../../(dashboard)/components/data";
+import { latestFilings, upcomingEvents, watchlist } from "../../(dashboard)/components/data";
+import { getCandles } from "@/lib/finnhub";
 
-// Next.js app router passes params as a prop
 interface CompanyPageProps {
-  params: { company: string };
+  params: { ticker: string };
 }
 
 export default async function Page({ params }: CompanyPageProps) {
-  const { company } = await params;
+  const { ticker } = await params;
+  const candles = await getCandles(ticker);
+  console.log("Candles response:", candles);
+
   return (
     <div className="@container/main flex flex-1 flex-col px-4 pb-40 pt-4 md:px-6 md:pb-44 md:pt-6">
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
@@ -34,16 +27,13 @@ export default async function Page({ params }: CompanyPageProps) {
             <TabsTrigger value="settings">Settings</TabsTrigger>
           </TabsList>
           <TabsContent value="overview">
-            <ChartLineInteractive />
+            <ChartLineInteractive candles={candles} ticker={ticker} />
           </TabsContent>
           <TabsContent value="analytics">
             <Card>
               <CardHeader>
                 <CardTitle>Analytics</CardTitle>
-                <CardDescription>
-                  Track performance and user engagement metrics. Monitor trends
-                  and identify growth opportunities.
-                </CardDescription>
+                <CardDescription>Track performance and user engagement metrics.</CardDescription>
               </CardHeader>
               <CardContent className="text-sm text-muted-foreground">
                 Page views are up 25% compared to last month.
@@ -54,10 +44,7 @@ export default async function Page({ params }: CompanyPageProps) {
             <Card>
               <CardHeader>
                 <CardTitle>Reports</CardTitle>
-                <CardDescription>
-                  Generate and download your detailed reports. Export data in
-                  multiple formats for analysis.
-                </CardDescription>
+                <CardDescription>Generate and download your detailed reports.</CardDescription>
               </CardHeader>
               <CardContent className="text-sm text-muted-foreground">
                 You have 5 reports ready and available to export.
@@ -68,10 +55,7 @@ export default async function Page({ params }: CompanyPageProps) {
             <Card>
               <CardHeader>
                 <CardTitle>Settings</CardTitle>
-                <CardDescription>
-                  Manage your account preferences and options. Customize your
-                  experience to fit your needs.
-                </CardDescription>
+                <CardDescription>Manage your account preferences and options.</CardDescription>
               </CardHeader>
               <CardContent className="text-sm text-muted-foreground">
                 Configure notifications, security, and themes.
