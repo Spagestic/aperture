@@ -8,12 +8,12 @@ import {
 } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ChartLineInteractive } from "./chart";
-import { DashboardRightRail } from "../(dashboard)/components/right-rail";
+import { DashboardRightRail } from "../../(dashboard)/components/right-rail";
 import {
   latestFilings,
   upcomingEvents,
   watchlist,
-} from "../(dashboard)/components/data";
+} from "../../(dashboard)/components/data";
 
 // Next.js app router passes params as a prop
 interface CompanyPageProps {
