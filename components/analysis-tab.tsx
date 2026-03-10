@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Sparkles, TrendingUp, TrendingDown, RefreshCw, Target, BarChart2, Newspaper } from "lucide-react";
+import { Sparkles, TrendingUp, TrendingDown, RefreshCw, BarChart2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -28,17 +28,11 @@ interface AnalystData {
     strongSell: number;
     period: string;
   }[];
-  priceTarget: {
-    targetHigh: number;
-    targetLow: number;
-    targetMean: number;
-    targetMedian: number;
-  };
 }
 
 interface AIAnalysis {
   raw: string;
-  sentiment: number; // 0-100
+  sentiment: number;
   bullCase: string;
   bearCase: string;
   bottomLine: string;
@@ -47,11 +41,9 @@ interface AIAnalysis {
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function parseMistralResponse(text: string): AIAnalysis {
-  // Try to extract sentiment score from text, default to 50
   const sentimentMatch = text.match(/sentiment[:\s]+(\d+)/i);
   const sentiment = sentimentMatch ? parseInt(sentimentMatch[1]) : 55;
 
-  // Extract bottom line
   const bottomLineMatch = text.match(/bottom line[:\s]+(.+?)(?:\n|$)/i);
   const bottomLine = bottomLineMatch
     ? bottomLineMatch[1]
@@ -83,7 +75,6 @@ function SentimentGauge({ score }: { score: number }) {
   return (
     <div className="flex flex-col items-center gap-2">
       <svg viewBox="0 0 120 70" className="w-32 h-auto">
-        {/* Background arc */}
         <path
           d="M 10 65 A 50 50 0 0 1 110 65"
           fill="none"
@@ -91,7 +82,6 @@ function SentimentGauge({ score }: { score: number }) {
           strokeWidth="10"
           strokeLinecap="round"
         />
-        {/* Colored arc */}
         <path
           d="M 10 65 A 50 50 0 0 1 110 65"
           fill="none"
@@ -100,7 +90,6 @@ function SentimentGauge({ score }: { score: number }) {
           strokeLinecap="round"
           strokeDasharray={`${(clipped / 100) * 157} 157`}
         />
-        {/* Needle */}
         <g transform={`rotate(${rotation}, 60, 65)`}>
           <line
             x1="60"
@@ -114,7 +103,6 @@ function SentimentGauge({ score }: { score: number }) {
           />
         </g>
         <circle cx="60" cy="65" r="4" fill="currentColor" opacity={0.7} />
-        {/* Labels */}
         <text x="8" y="78" fontSize="8" fill="#ef4444" fontWeight="500">
           Bear
         </text>
@@ -176,7 +164,6 @@ function AnalystConsensus({ data }: { data: AnalystData }) {
           </p>
         </div>
 
-        {/* Bar */}
         <div className="flex h-3 w-full overflow-hidden rounded-full">
           <div
             className="bg-green-500 transition-all"
@@ -192,7 +179,6 @@ function AnalystConsensus({ data }: { data: AnalystData }) {
           />
         </div>
 
-        {/* Legend */}
         <div className="flex justify-between text-xs">
           <div className="flex items-center gap-1.5">
             <span className="w-2 h-2 rounded-full bg-green-500 inline-block" />
@@ -225,85 +211,6 @@ function AnalystConsensus({ data }: { data: AnalystData }) {
   );
 }
 
-function PriceTarget({
-  data,
-  currentPrice,
-}: {
-  data: AnalystData;
-  currentPrice: number;
-}) {
-  const { targetHigh, targetLow, targetMean } = data.priceTarget;
-  const upside = (((targetMean - currentPrice) / currentPrice) * 100).toFixed(1);
-  const isUpside = parseFloat(upside) > 0;
-
-  // Position of current price on the low-high bar
-  const range = targetHigh - targetLow;
-  const currentPos = Math.min(
-    100,
-    Math.max(0, ((currentPrice - targetLow) / range) * 100)
-  );
-  const meanPos = Math.min(
-    100,
-    Math.max(0, ((targetMean - targetLow) / range) * 100)
-  );
-
-  return (
-    <Card>
-      <CardHeader className="pb-2">
-        <CardTitle className="text-sm font-medium flex items-center gap-2">
-          <Target className="w-4 h-4" />
-          Price Target
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="flex items-end justify-between">
-          <div>
-            <p className="text-2xl font-bold">${targetMean?.toFixed(2)}</p>
-            <p className="text-xs text-muted-foreground">Average target</p>
-          </div>
-          <Badge
-            variant="outline"
-            className={cn(
-              "text-sm font-semibold",
-              isUpside
-                ? "border-green-500 text-green-500"
-                : "border-red-500 text-red-500"
-            )}
-          >
-            {isUpside ? "▲" : "▼"} {Math.abs(parseFloat(upside))}% upside
-          </Badge>
-        </div>
-
-        {/* Range bar */}
-        <div className="relative pt-6 pb-2">
-          <div className="h-1.5 w-full bg-muted rounded-full relative">
-            {/* Mean marker */}
-            <div
-              className="absolute -top-5 -translate-x-1/2 text-xs text-muted-foreground"
-              style={{ left: `${meanPos}%` }}
-            >
-              avg
-            </div>
-            <div
-              className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-3 h-3 rounded-full bg-primary border-2 border-background"
-              style={{ left: `${meanPos}%` }}
-            />
-            {/* Current price marker */}
-            <div
-              className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-2 h-2 rounded-full bg-muted-foreground/50"
-              style={{ left: `${currentPos}%` }}
-            />
-          </div>
-          <div className="flex justify-between mt-2 text-xs text-muted-foreground">
-            <span>Low ${targetLow?.toFixed(2)}</span>
-            <span>High ${targetHigh?.toFixed(2)}</span>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  );
-}
-
 function TechnicalIndicators({
   price,
   high,
@@ -317,22 +224,15 @@ function TechnicalIndicators({
   open: number;
   prevClose: number;
 }) {
-  // Simple calculations from available data
   const change = price - prevClose;
   const changePct = (change / prevClose) * 100;
 
-  // Rough RSI approximation (just for display — real RSI needs history)
-  const roughRSI = Math.min(
-    90,
-    Math.max(10, 50 + changePct * 3)
-  );
+  const roughRSI = Math.min(90, Math.max(10, 50 + changePct * 3));
   const rsiInfo = getRSILabel(roughRSI);
 
-  // Simple MA signal
   const ma50Signal = price > prevClose * 0.98 ? "Above MA50" : "Below MA50";
   const ma50Color = price > prevClose * 0.98 ? "text-green-500" : "text-red-500";
 
-  // Momentum
   const momentum = changePct > 1 ? "Strong" : changePct > 0 ? "Weak" : "Negative";
   const momentumColor =
     changePct > 1
@@ -341,7 +241,6 @@ function TechnicalIndicators({
       ? "text-yellow-500"
       : "text-red-500";
 
-  // Volatility
   const volatility = (((high - low) / prevClose) * 100).toFixed(2);
 
   const indicators = [
@@ -367,8 +266,7 @@ function TechnicalIndicators({
       label: "Volatility",
       value: `${volatility}%`,
       signal: parseFloat(volatility) > 2 ? "High" : "Low",
-      color:
-        parseFloat(volatility) > 2 ? "text-yellow-500" : "text-green-500",
+      color: parseFloat(volatility) > 2 ? "text-yellow-500" : "text-green-500",
     },
   ];
 
@@ -426,7 +324,6 @@ function BullBearCase({ ticker, price }: { ticker: string; price: number }) {
         <CardTitle className="text-sm font-medium">Bull vs Bear Case</CardTitle>
       </CardHeader>
       <CardContent className="grid grid-cols-2 gap-3">
-        {/* Bull */}
         <div className="rounded-lg border border-green-500/20 bg-green-500/5 p-3 space-y-2">
           <div className="flex items-center gap-1.5 text-green-500 font-semibold text-sm">
             <TrendingUp className="w-4 h-4" />
@@ -439,13 +336,10 @@ function BullBearCase({ ticker, price }: { ticker: string; price: number }) {
               <Skeleton className="h-3 w-3/4" />
             </div>
           ) : (
-            <p className="text-xs text-muted-foreground leading-relaxed">
-              {bull}
-            </p>
+            <p className="text-xs text-muted-foreground leading-relaxed">{bull}</p>
           )}
         </div>
 
-        {/* Bear */}
         <div className="rounded-lg border border-red-500/20 bg-red-500/5 p-3 space-y-2">
           <div className="flex items-center gap-1.5 text-red-500 font-semibold text-sm">
             <TrendingDown className="w-4 h-4" />
@@ -458,9 +352,7 @@ function BullBearCase({ ticker, price }: { ticker: string; price: number }) {
               <Skeleton className="h-3 w-3/4" />
             </div>
           ) : (
-            <p className="text-xs text-muted-foreground leading-relaxed">
-              {bear}
-            </p>
+            <p className="text-xs text-muted-foreground leading-relaxed">{bear}</p>
           )}
         </div>
       </CardContent>
@@ -536,9 +428,7 @@ function AIAnalysisSection({ ticker, price }: { ticker: string; price: number })
             </div>
           </div>
         ) : (
-          <p className="text-sm text-muted-foreground">
-            Failed to load analysis.
-          </p>
+          <p className="text-sm text-muted-foreground">Failed to load analysis.</p>
         )}
       </CardContent>
     </Card>
@@ -570,18 +460,12 @@ export function AnalysisTab({
 
   return (
     <div className="space-y-4 py-4">
-      {/* Row 1: Analyst Consensus + Price Target + Technical */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      {/* Row 1: Analyst Consensus + Technical */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {analystLoading ? (
-          <>
-            <Skeleton className="h-[180px]" />
-            <Skeleton className="h-[180px]" />
-          </>
+          <Skeleton className="h-[180px]" />
         ) : analystData ? (
-          <>
-            <AnalystConsensus data={analystData} />
-            <PriceTarget data={analystData} currentPrice={price} />
-          </>
+          <AnalystConsensus data={analystData} />
         ) : null}
         <TechnicalIndicators
           price={price}
