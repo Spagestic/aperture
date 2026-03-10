@@ -7,7 +7,8 @@ import { DashboardRightRail } from "../../(dashboard)/components/right-rail";
 import { latestFilings, upcomingEvents, watchlist } from "../../(dashboard)/components/data";
 import { getQuote, getCompanyProfile } from "@/lib/finnhub";
 import { AnalysisTab } from "@/components/analysis-tab";
-import Financials from "@/components/company/Financials"; // ← add this
+import Financials from "@/components/company/Financials"; 
+import Earnings from '@/components/company/Earnings'
 
 interface CompanyPageProps {
   params: { ticker: string };
@@ -75,12 +76,13 @@ export default async function Page({ params }: CompanyPageProps) {
 
           {/* Tabs */}
           <Tabs defaultValue="overview" className="w-full">
-            <TabsList>
-              <TabsTrigger value="overview">Overview</TabsTrigger>
-              <TabsTrigger value="financials">Financials</TabsTrigger>
-              <TabsTrigger value="reports">Reports</TabsTrigger>
-              <TabsTrigger value="analysis">Analysis</TabsTrigger>
-            </TabsList>
+           <TabsList>
+  <TabsTrigger value="overview">Overview</TabsTrigger>
+  <TabsTrigger value="financials">Financials</TabsTrigger>
+  <TabsTrigger value="earnings">Earnings</TabsTrigger>  {/* ← ADD HERE */}
+  <TabsTrigger value="reports">Reports</TabsTrigger>
+  <TabsTrigger value="analysis">Analysis</TabsTrigger>
+</TabsList>
 
             <TabsContent value="overview" className="flex flex-col gap-4">
               {/* Chart */}
@@ -114,6 +116,10 @@ export default async function Page({ params }: CompanyPageProps) {
 
             <TabsContent value="financials">
   <Financials ticker={ticker} />
+</TabsContent>
+
+<TabsContent value="earnings">
+  <Earnings ticker={ticker} />
 </TabsContent>
 
             <TabsContent value="reports">
