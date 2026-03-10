@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { CartesianGrid, Line, LineChart, XAxis } from "recharts";
+import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts";
 import {
   Card,
   CardContent,
@@ -25,14 +25,14 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
-const RANGES = ["1W", "1M", "3M", "6M", "1Y", "5Y"];
+const RANGES = ["1D", "5D", "1W", "1M", "3M", "6M", "1Y", "5Y"];
 
 interface ChartLineInteractiveProps {
   ticker: string;
 }
 
 export function ChartLineInteractive({ ticker }: ChartLineInteractiveProps) {
-  const [range, setRange] = React.useState("1Y");
+  const [range, setRange] = React.useState("1D");
   const [chartData, setChartData] = React.useState<{ date: string; price: number }[]>([]);
   const [loading, setLoading] = React.useState(true);
 
@@ -54,14 +54,26 @@ export function ChartLineInteractive({ ticker }: ChartLineInteractiveProps) {
       .catch(() => setLoading(false));
   }, [ticker, range]);
 
+  const getDescription = () => {
+    switch (range) {
+      case "1D": return "Showing close price for today";
+      case "5D": return "Showing close price for the last 5 days";
+      case "1W": return "Showing close price for the last week";
+      case "1M": return "Showing close price for the last month";
+      case "3M": return "Showing close price for the last 3 months";
+      case "6M": return "Showing close price for the last 6 months";
+      case "1Y": return "Showing close price for the last year";
+      case "5Y": return "Showing close price for the last 5 years";
+      default: return "";
+    }
+  };
+
   return (
     <Card className="py-4 sm:py-0">
       <CardHeader className="flex flex-col items-stretch border-b p-0! sm:flex-row">
         <div className="flex flex-1 flex-col justify-center gap-1 px-6 pb-3 sm:pb-0">
           <CardTitle>{ticker} Stock Price</CardTitle>
-          <CardDescription>
-            Showing close price for {range === "1W" ? "the last week" : `the last ${range}`}
-          </CardDescription>
+          <CardDescription>{getDescription()}</CardDescription>
         </div>
         {/* Range Buttons */}
         <div className="flex items-center gap-1 px-6 pb-3 sm:pb-0">
@@ -85,6 +97,16 @@ export function ChartLineInteractive({ ticker }: ChartLineInteractiveProps) {
           <ChartContainer config={chartConfig} className="aspect-auto h-[250px] w-full">
             <LineChart data={chartData} margin={{ left: 12, right: 12 }}>
               <CartesianGrid vertical={false} />
+               <YAxis
+    domain={([dataMin, dataMax]) => {
+      const padding = (dataMax - dataMin) * 0.1 || 1;
+      return [
+        parseFloat((dataMin - padding).toFixed(2)),
+        parseFloat((dataMax + padding).toFixed(2)),
+      ];
+    }}
+    hide={true}
+  />
               <XAxis
                 dataKey="date"
                 tickLine={false}

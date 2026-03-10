@@ -1,6 +1,5 @@
 import YahooFinance from "yahoo-finance2";
-
-const yahooFinance = new YahooFinance({ suppressNotices: ["ripHistorical"] });
+const yahooFinance = new YahooFinance();
 
 const FINNHUB_API_KEY = process.env.NEXT_PUBLIC_FINNHUB_API_KEY;
 const BASE_URL = "https://finnhub.io/api/v1";
@@ -28,6 +27,14 @@ export async function getCandles(ticker: string, range: string = "1Y") {
     let interval: "1d" | "1h" | "1wk" = "1d";
 
     switch (range) {
+      case "1D":
+  period1 = new Date(Date.now() - 1 * 24 * 60 * 60 * 1000);
+  interval = "1h";
+  break;
+case "5D":
+  period1 = new Date(Date.now() - 5 * 24 * 60 * 60 * 1000);
+  interval = "1h";
+  break;
       case "1W":
         period1 = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
         interval = "1h";
@@ -57,7 +64,7 @@ export async function getCandles(ticker: string, range: string = "1Y") {
       period1,
       period2: now,
       interval,
-    });
+    }, { validateResult: false });
 
     return {
       s: "ok",
