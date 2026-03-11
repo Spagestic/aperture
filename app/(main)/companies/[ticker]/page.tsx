@@ -101,10 +101,6 @@ export default async function Page({ params }: CompanyPageProps) {
                       ? `$${(profile.marketCapitalization / 1000).toFixed(2)}B`
                       : "N/A",
                   },
-                  {
-                    label: "Employees",
-                    value: profile.employeeTotal?.toLocaleString() ?? "N/A",
-                  },
                 ].map((item) => (
                   <div key={item.label} className="rounded-lg border p-3">
                     <p className="text-xs text-muted-foreground">{item.label}</p>
