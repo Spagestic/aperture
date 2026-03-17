@@ -2,16 +2,8 @@ import Link from "next/link";
 import { CalendarDays, FileText } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-
-import { ChangePill } from "./change-pill";
 import type { FilingItem, UpcomingEvent, WatchlistItem } from "./data";
 
 type DashboardRightRailProps = {
@@ -31,41 +23,52 @@ export function DashboardRightRail({
 }: DashboardRightRailProps) {
   return (
     <aside className="space-y-4">
-      <Card>
-        <CardHeader>
-          <CardTitle>Create watchlist</CardTitle>
-          <CardDescription>
-            Track your highest-priority companies in one place.
-          </CardDescription>
-        </CardHeader>
-
-        <CardContent className="space-y-4">
-          {watchlist.map((item, index) => (
+      <div className="mb-2 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <h2 className="text-md font-medium">Watchlist</h2>
+          <span className="">›</span>
+        </div>
+      </div>
+      <Card className="rounded-lg border border-white/10 bg-[#171717] p-0 shadow-none overflow-hidden">
+        <CardContent className="p-0">
+          {watchlist.map((item) => (
             <div key={item.ticker}>
-              {index > 0 && <Separator className="mb-4" />}
-              <div className="flex items-center justify-between gap-3">
-                <div className="min-w-0">
-                  <Link
-                    href={`/${companySlugFromTicker(item.ticker)}`}
-                    className="block truncate text-sm font-medium hover:underline"
-                  >
-                    {item.company}
-                  </Link>
-                  <Link
-                    href={`/${companySlugFromTicker(item.ticker)}/financials`}
-                    className="text-xs text-muted-foreground hover:underline"
-                  >
-                    {item.ticker}
-                  </Link>
-                </div>
+              <Link
+                href={`/${companySlugFromTicker(item.ticker)}`}
+                className="flex items-center justify-between px-4 py-3 transition-colors hover:bg-muted"
+              >
+                <div className="flex min-w-0 items-center gap-3">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#2a2a2a]">
+                    {/* <img
+                src={`https://logo.clearbit.com/${item.domain}`}
+                alt={`${item.company} logo`}
+                className="h-full w-full object-cover"
+              /> */}
+                  </div>
 
-                <div className="text-right">
-                  <p className="text-sm font-medium">{item.price}</p>
-                  <div className="mt-1">
-                    <ChangePill tone={item.tone} value={item.change} />
+                  <div className="min-w-0">
+                    <div className="truncate text-sm font-medium leading-tight text-white">
+                      {item.company}
+                    </div>
+                    <div className="mt-0.5 text-xs font-medium uppercase tracking-wide text-[#9ca3af]">
+                      {item.ticker} · NASDAQ
+                    </div>
                   </div>
                 </div>
-              </div>
+
+                <div className="ml-3 shrink-0 text-right">
+                  <p className="text-sm font-medium leading-tight">
+                    {item.price}
+                  </p>
+                  <p
+                    className={`mt-0.5 text-xs   font-medium leading-tight ${
+                      item.tone === "up" ? "text-emerald-400" : "text-red-400"
+                    }`}
+                  >
+                    {item.change}
+                  </p>
+                </div>
+              </Link>
             </div>
           ))}
         </CardContent>

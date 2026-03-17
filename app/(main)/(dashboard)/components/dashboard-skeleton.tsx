@@ -4,38 +4,24 @@ import { Skeleton } from "@/components/ui/skeleton";
 export function DashboardSkeleton() {
   return (
     <div className="@container/main flex flex-1 flex-col px-4 pb-40 pt-4 md:px-6 md:pb-44 md:pt-6">
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
+      {/* market strip skeleton */}
+      <div className="border-b border-border/50 pb-4">
+        <div className="flex items-center gap-2 overflow-x-auto whitespace-nowrap py-2 no-scrollbar">
+          <Skeleton className="h-6 w-32 shrink-0" />
+          <div className="flex items-center gap-1">
+            <Skeleton className="h-6 w-6 shrink-0" />
+            <Skeleton className="h-6 w-6 shrink-0" />
+          </div>
+          <div className="flex items-center gap-2">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <Skeleton key={i} className="h-8 w-32 shrink-0 rounded-md" />
+            ))}
+          </div>
+        </div>
+      </div>
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px] pt-4">
         {/* Left: Market pulse + summary */}
         <div className="mx-auto flex w-full max-w-7xl flex-col gap-6">
-          <section className="space-y-3">
-            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-              {Array.from({ length: 4 }).map((_, i) => (
-                <Card
-                  key={i}
-                  className="overflow-hidden rounded-2xl border border-border/50 bg-card/95 pt-4 pb-0"
-                >
-                  <CardContent className="p-0">
-                    <div className="px-4 pt-0">
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="min-w-0">
-                          <Skeleton className="h-4 w-24" />
-                          <Skeleton className="mt-2 h-4 w-16" />
-                        </div>
-                        <div className="shrink-0 text-right">
-                          <Skeleton className="h-4 w-14" />
-                          <Skeleton className="mt-2 h-3 w-12" />
-                        </div>
-                      </div>
-                    </div>
-                    <div className="h-18 w-full pt-2">
-                      <Skeleton className="h-full w-full rounded-none" />
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </section>
-
           <div>
             <div className="pb-2 mx-2 flex items-center justify-between gap-2">
               <Skeleton className="h-4 w-28" />
@@ -43,7 +29,7 @@ export function DashboardSkeleton() {
             </div>
             <Card className="rounded-lg border">
               <div className="space-y-0">
-                {Array.from({ length: 4 }).map((_, i) => (
+                {Array.from({ length: 8 }).map((_, i) => (
                   <div
                     key={i}
                     className="flex items-center justify-between border-b px-4 py-3 last:border-b-0"
@@ -66,7 +52,10 @@ export function DashboardSkeleton() {
             </CardHeader>
             <CardContent className="space-y-4">
               {Array.from({ length: 5 }).map((_, i) => (
-                <div key={i} className="flex items-center justify-between gap-3">
+                <div
+                  key={i}
+                  className="flex items-center justify-between gap-3"
+                >
                   <div className="min-w-0">
                     <Skeleton className="h-4 w-24" />
                     <Skeleton className="mt-1 h-3 w-12" />
