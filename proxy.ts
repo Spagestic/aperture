@@ -17,6 +17,7 @@ const isPublicApiRoute = createRouteMatcher([
 ]);
 
 export const proxy = convexAuthNextjsMiddleware(async (request, { convexAuth }) => {
+export const proxy = convexAuthNextjsMiddleware(async (request, { convexAuth }) => {
   const isAuthenticated = await convexAuth.isAuthenticated();
 
   if (isSignInPage(request) && isAuthenticated) {
