@@ -7,7 +7,7 @@ import { Separator } from "@/components/ui/separator";
 import type { FilingItem, UpcomingEvent, WatchlistItem } from "./data";
 
 type DashboardRightRailProps = {
-  watchlist: WatchlistItem[];
+  watchlist?: unknown;       // kept for backwards compat with page.tsx — ignored
   upcomingEvents: UpcomingEvent[];
   latestFilings: FilingItem[];
 };
@@ -17,7 +17,6 @@ function companySlugFromTicker(ticker: string) {
 }
 
 export function DashboardRightRail({
-  watchlist,
   upcomingEvents,
   latestFilings,
 }: DashboardRightRailProps) {
@@ -81,7 +80,6 @@ export function DashboardRightRail({
             <CardTitle>Upcoming</CardTitle>
           </div>
         </CardHeader>
-
         <CardContent className="space-y-4">
           {upcomingEvents.map((item, index) => (
             <div key={`${item.day}-${item.title}`}>
@@ -100,6 +98,7 @@ export function DashboardRightRail({
         </CardContent>
       </Card>
 
+      {/* Latest Filings — unchanged */}
       <Card>
         <CardHeader>
           <div className="flex items-center gap-2">
@@ -107,7 +106,6 @@ export function DashboardRightRail({
             <CardTitle>Latest filings</CardTitle>
           </div>
         </CardHeader>
-
         <CardContent className="space-y-4">
           {latestFilings.map((item, index) => (
             <div key={`${item.ticker}-${item.type}`}>
@@ -125,6 +123,7 @@ export function DashboardRightRail({
           ))}
         </CardContent>
       </Card>
+
     </aside>
   );
 }

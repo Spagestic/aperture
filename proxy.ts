@@ -16,15 +16,13 @@ const isPublicApiRoute = createRouteMatcher([
   "/api/company-financials(.*)",
 ]);
 
-export default convexAuthNextjsMiddleware(async (request, { convexAuth }) => {
+export const proxy = convexAuthNextjsMiddleware(async (request, { convexAuth }) => {
   const isAuthenticated = await convexAuth.isAuthenticated();
 
-  // Redirect authenticated users away from sign-in pages
   if (isSignInPage(request) && isAuthenticated) {
     return nextjsMiddlewareRedirect(request, "/");
   }
 
-  // Redirect unauthenticated users to login for protected pages
   if (isProtectedRoute(request) && !isAuthenticated) {
     return nextjsMiddlewareRedirect(request, "/login");
   }
