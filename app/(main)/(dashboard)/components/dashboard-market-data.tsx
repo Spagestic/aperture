@@ -11,7 +11,7 @@ import {
 } from "./data";
 import { DashboardSkeleton } from "./dashboard-skeleton";
 import { MarketSummaryCard } from "./market-summary-card";
-import { DashboardRightRail } from "./right-rail";
+import { RightRail } from "./right-rail";
 import type { DashboardData } from "@/convex/market";
 import { MarketStrip } from "./market-strip";
 
@@ -77,7 +77,7 @@ export function DashboardMarketData() {
             )}
             <MarketSummaryCard items={marketSummary} />
           </div>
-          <DashboardRightRail
+          <RightRail
             watchlist={watchlist}
             upcomingEvents={upcomingEvents}
             latestFilings={latestFilings}

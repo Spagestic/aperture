@@ -14,11 +14,17 @@ const marketData = [
     change: "0.75%",
     up: false,
   },
+  {
+    symbol: "Nikkei 225",
+    price: "28,567.89",
+    change: "0.30%",
+    up: true,
+  },
 ];
 
 export function MarketStrip() {
   return (
-    <div className="flex items-center gap-2 overflow-x-auto whitespace-nowrap py-2 no-scrollbar">
+    <div className="flex items-center gap-2 overflow-x-auto whitespace-nowrap no-scrollbar">
       <div className="flex items-center gap-2">
         {marketData.map((item) => (
           <div

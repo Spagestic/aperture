@@ -1,14 +1,24 @@
 import React from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { ChartLineInteractive } from "./chart";
-import { DashboardRightRail } from "../../(dashboard)/components/right-rail";
-import { latestFilings, upcomingEvents, watchlist } from "../../(dashboard)/components/data";
+import { RightRail } from "../../(dashboard)/components/right-rail";
+import {
+  latestFilings,
+  upcomingEvents,
+  watchlist,
+} from "../../(dashboard)/components/data";
 import { getQuote, getCompanyProfile } from "@/lib/finnhub";
 import { AnalysisTab } from "@/components/analysis-tab";
-import Financials from "@/components/company/Financials"; 
-import Earnings from '@/components/company/Earnings'
+import Financials from "@/components/company/Financials";
+import Earnings from "@/components/company/Earnings";
 
 interface CompanyPageProps {
   params: { ticker: string };
@@ -52,11 +62,14 @@ export default async function Page({ params }: CompanyPageProps) {
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
         {/* Left Side */}
         <div className="flex flex-col gap-4">
-
           {/* Company Header */}
           <div className="flex items-center gap-4">
             {profile.logo && (
-              <img src={profile.logo} alt={profile.name} className="w-12 h-12 rounded-lg" />
+              <img
+                src={profile.logo}
+                alt={profile.name}
+                className="w-12 h-12 rounded-lg"
+              />
             )}
             <div>
               <h1 className="text-2xl font-bold">{profile.name ?? ticker}</h1>
@@ -70,19 +83,21 @@ export default async function Page({ params }: CompanyPageProps) {
           <div className="flex items-baseline gap-3">
             <span className="text-4xl font-bold">${quote.c?.toFixed(2)}</span>
             <Badge variant={isPositive ? "default" : "destructive"}>
-              {isPositive ? "▲" : "▼"} {Math.abs(quote.d ?? 0)?.toFixed(2)} ({Math.abs(quote.dp ?? 0)?.toFixed(2)}%)
+              {isPositive ? "▲" : "▼"} {Math.abs(quote.d ?? 0)?.toFixed(2)} (
+              {Math.abs(quote.dp ?? 0)?.toFixed(2)}%)
             </Badge>
           </div>
 
           {/* Tabs */}
           <Tabs defaultValue="overview" className="w-full">
-           <TabsList>
-  <TabsTrigger value="overview">Overview</TabsTrigger>
-  <TabsTrigger value="financials">Financials</TabsTrigger>
-  <TabsTrigger value="earnings">Earnings</TabsTrigger>  {/* ← ADD HERE */}
-  <TabsTrigger value="reports">Reports</TabsTrigger>
-  <TabsTrigger value="analysis">Analysis</TabsTrigger>
-</TabsList>
+            <TabsList>
+              <TabsTrigger value="overview">Overview</TabsTrigger>
+              <TabsTrigger value="financials">Financials</TabsTrigger>
+              <TabsTrigger value="earnings">Earnings</TabsTrigger>{" "}
+              {/* ← ADD HERE */}
+              <TabsTrigger value="reports">Reports</TabsTrigger>
+              <TabsTrigger value="analysis">Analysis</TabsTrigger>
+            </TabsList>
 
             <TabsContent value="overview" className="flex flex-col gap-4">
               {/* Chart */}
@@ -103,7 +118,9 @@ export default async function Page({ params }: CompanyPageProps) {
                   },
                 ].map((item) => (
                   <div key={item.label} className="rounded-lg border p-3">
-                    <p className="text-xs text-muted-foreground">{item.label}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {item.label}
+                    </p>
                     <p className="text-sm font-semibold">{item.value}</p>
                   </div>
                 ))}
@@ -111,18 +128,20 @@ export default async function Page({ params }: CompanyPageProps) {
             </TabsContent>
 
             <TabsContent value="financials">
-  <Financials ticker={ticker} />
-</TabsContent>
+              <Financials ticker={ticker} />
+            </TabsContent>
 
-<TabsContent value="earnings">
-  <Earnings ticker={ticker} />
-</TabsContent>
+            <TabsContent value="earnings">
+              <Earnings ticker={ticker} />
+            </TabsContent>
 
             <TabsContent value="reports">
               <Card>
                 <CardHeader>
                   <CardTitle>Reports</CardTitle>
-                  <CardDescription>Generate and download your detailed reports.</CardDescription>
+                  <CardDescription>
+                    Generate and download your detailed reports.
+                  </CardDescription>
                 </CardHeader>
                 <CardContent className="text-sm text-muted-foreground">
                   You have 5 reports ready and available to export.
@@ -130,22 +149,21 @@ export default async function Page({ params }: CompanyPageProps) {
               </Card>
             </TabsContent>
 
-           <TabsContent value="analysis">
-  <AnalysisTab
-    ticker={ticker}
-    price={quote.c ?? 0}
-    high={quote.h ?? 0}
-    low={quote.l ?? 0}
-    open={quote.o ?? 0}
-    prevClose={quote.pc ?? 0}
-  />
-</TabsContent>
-
+            <TabsContent value="analysis">
+              <AnalysisTab
+                ticker={ticker}
+                price={quote.c ?? 0}
+                high={quote.h ?? 0}
+                low={quote.l ?? 0}
+                open={quote.o ?? 0}
+                prevClose={quote.pc ?? 0}
+              />
+            </TabsContent>
           </Tabs>
         </div>
 
         {/* Right Side */}
-        <DashboardRightRail
+        <RightRail
           watchlist={watchlist}
           upcomingEvents={upcomingEvents}
           latestFilings={latestFilings}

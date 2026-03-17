@@ -1,6 +1,6 @@
 import React from "react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { DashboardRightRail } from "../(dashboard)/components/right-rail";
+import { RightRail } from "../(dashboard)/components/right-rail";
 import {
   latestFilings,
   upcomingEvents,
@@ -96,7 +96,7 @@ export default async function CompanyLayout({
           <div className="pt-4">{children}</div>
         </div>
         {/* Right Side */}
-        <DashboardRightRail
+        <RightRail
           watchlist={watchlist}
           upcomingEvents={upcomingEvents}
           latestFilings={latestFilings}
