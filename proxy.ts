@@ -16,30 +16,31 @@ const isPublicApiRoute = createRouteMatcher([
   "/api/company-financials(.*)",
 ]);
 
-export const proxy = convexAuthNextjsMiddleware(async (request, { convexAuth }) => {
-export const proxy = convexAuthNextjsMiddleware(async (request, { convexAuth }) => {
-  const isAuthenticated = await convexAuth.isAuthenticated();
+export const proxy = convexAuthNextjsMiddleware(
+  async (request, { convexAuth }) => {
+    const isAuthenticated = await convexAuth.isAuthenticated();
 
-  if (isSignInPage(request) && isAuthenticated) {
-    return nextjsMiddlewareRedirect(request, "/");
-  }
+    if (isSignInPage(request) && isAuthenticated) {
+      return nextjsMiddlewareRedirect(request, "/");
+    }
 
-  if (isProtectedRoute(request) && !isAuthenticated) {
-    return nextjsMiddlewareRedirect(request, "/login");
-  }
+    if (isProtectedRoute(request) && !isAuthenticated) {
+      return nextjsMiddlewareRedirect(request, "/login");
+    }
 
-  // Return 401 for unauthenticated API requests
-  if (
-    isProtectedApiRoute(request) &&
-    !isPublicApiRoute(request) &&
-    !isAuthenticated
-  ) {
-    return NextResponse.json(
-      { error: "Authentication required" },
-      { status: 401 },
-    );
-  }
-});
+    // Return 401 for unauthenticated API requests
+    if (
+      isProtectedApiRoute(request) &&
+      !isPublicApiRoute(request) &&
+      !isAuthenticated
+    ) {
+      return NextResponse.json(
+        { error: "Authentication required" },
+        { status: 401 },
+      );
+    }
+  },
+);
 
 export const config = {
   matcher: ["/((?!.*\\..*|_next).*)", "/dashboard", "/(api|trpc)(.*)"],
