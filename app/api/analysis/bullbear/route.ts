@@ -17,7 +17,13 @@ export async function POST(req: Request) {
       ],
     });
 
-    const text = response.choices[0].message.content ?? "{}";
+    const content = response.choices[0].message.content;
+    const text =
+      typeof content === "string"
+        ? content
+        : Array.isArray(content)
+          ? content.map((chunk) => ("text" in chunk ? chunk.text : "")).join("")
+          : "{}";
 
     try {
       const json = JSON.parse(text.match(/\{[\s\S]*\}/)?.[0] ?? "{}");

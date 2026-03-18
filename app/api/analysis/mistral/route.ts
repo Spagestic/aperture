@@ -25,7 +25,13 @@ Keep it under 200 words.`,
       ],
     });
 
-    const analysis = response.choices[0].message.content ?? "";
+    const content = response.choices[0].message.content;
+    const analysis =
+      typeof content === "string"
+        ? content
+        : Array.isArray(content)
+          ? content.map((chunk) => ("text" in chunk ? chunk.text : "")).join("")
+          : "";
     return Response.json({ analysis });
   } catch (error) {
     console.error("Mistral error:", error);

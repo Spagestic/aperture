@@ -3,7 +3,7 @@ import { NextRequest } from "next/server";
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { ticker: string } }
+  { params }: { params: Promise<{ ticker: string }> }
 ) {
   const { ticker } = await params;
   const range = req.nextUrl.searchParams.get("range") ?? "1Y";
