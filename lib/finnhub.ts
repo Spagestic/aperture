@@ -60,11 +60,24 @@ case "5D":
         interval = "1d";
     }
 
-    const data = await yahooFinance.chart(ticker, {
-      period1,
-      period2: now,
-      interval,
-    }, { validateResult: false });
+    const data = (await yahooFinance.chart(
+      ticker,
+      {
+        period1,
+        period2: now,
+        interval,
+      },
+      { validateResult: false }
+    )) as {
+      quotes: Array<{
+        date: Date | string;
+        close: number;
+        open: number;
+        high: number;
+        low: number;
+        volume: number;
+      }>;
+    };
 
     return {
       s: "ok",
