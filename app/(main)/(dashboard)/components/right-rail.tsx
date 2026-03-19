@@ -34,7 +34,7 @@ export function RightRail({
           {watchlist.map((item) => (
             <div key={item.ticker}>
               <Link
-                href={`/${companySlugFromTicker(item.ticker)}`}
+                href={`/company/${companySlugFromTicker(item.ticker)}`}
                 className="flex items-center justify-between px-4 py-3 transition-colors hover:bg-muted"
               >
                 <div className="flex min-w-0 items-center gap-3">

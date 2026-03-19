@@ -1,11 +1,11 @@
 import React from "react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { RightRail } from "../(dashboard)/components/right-rail";
+import { RightRail } from "../../(dashboard)/components/right-rail";
 import {
   latestFilings,
   upcomingEvents,
   watchlist,
-} from "../(dashboard)/components/data";
+} from "../../(dashboard)/components/data";
 import Link from "next/link";
 import { Star } from "lucide-react";
 
@@ -17,23 +17,23 @@ import { fetchCompanyFinancials } from "@/lib/company-financials-api";
 
 interface CompanyLayoutProps {
   children: ReactNode;
-  params: Promise<{ company: string }>;
+  params: Promise<{ id: string }>;
 }
 
 export default async function CompanyLayout({
   children,
   params,
 }: CompanyLayoutProps) {
-  const { company } = await params;
+  const { id } = await params;
   const apiKey = process.env.ALPHA_VANTAGE_API_KEY;
-  const ticker = company.length <= 5 ? company.toUpperCase() : company;
+  const ticker = id.length <= 5 ? id.toUpperCase() : id;
 
-  let payload = getDemoCompanyFinancialPayload(company);
+  let payload = getDemoCompanyFinancialPayload(id);
   if (apiKey) {
     try {
       payload = await fetchCompanyFinancials(ticker, apiKey);
     } catch {
-      payload = getDemoCompanyFinancialPayload(company);
+      payload = getDemoCompanyFinancialPayload(id);
     }
   }
 
@@ -84,7 +84,9 @@ export default async function CompanyLayout({
                 <TabsTrigger asChild key={tab.value} value={tab.value}>
                   <Link
                     href={
-                      tab.value ? `/${company}/${tab.value}` : `/${company}`
+                      tab.value
+                        ? `/company/${id}/${tab.value}`
+                        : `/company/${id}`
                     }
                   >
                     {tab.label}

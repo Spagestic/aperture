@@ -168,6 +168,48 @@ aperture/
 │   ├── dashboard/         # Main dashboard
 │   ├── company/[id]/      # Company detail pages
 │   └── search/            # Search interface
+   └── 📁api
+      └── 📁chat
+         ├── route.ts
+      └── 📁exa
+         └── 📁scrape
+               └── 📁batch
+                  ├── route.ts
+               └── 📁subpages
+                  ├── route.ts
+               ├── route.ts
+         └── 📁search
+               ├── route.ts
+         └── 📁search-and-contents
+               ├── route.ts
+      └── 📁finnhub
+         └── 📁[ticker]
+               ├── route.ts
+      └── 📁firecrawl
+         └── 📁agent
+               ├── route.ts
+               ├── types.ts
+         └── 📁crawl
+               ├── route.ts
+               ├── types.ts
+         └── 📁map
+               ├── route.ts
+               ├── types.ts
+         └── 📁scrape
+               ├── route.ts
+               ├── types.ts
+         └── 📁search
+               ├── route.ts
+               ├── types.ts
+         ├── firecrawlClient.ts
+      └── 📁fmp
+         └── 📁[ticker]
+               ├── route.ts
+      └── 📁ocr
+         ├── route.ts
+      └── 📁yahoo
+         └── 📁[ticker]
+               └── route.ts
 ├── convex/                # Convex backend
 │   ├── schema.ts          # Database schema
 │   ├── companies.ts       # Company queries/mutations
@@ -181,9 +223,6 @@ aperture/
 │   ├── charts/           # Financial charts
 │   └── dashboard/        # Dashboard components
 ├── lib/                   # Utilities
-│   ├── mistral.ts        # Mistral AI client
-│   ├── exa.ts            # Exa search client
-│   └── firecrawl.ts      # Firecrawl scraper
 └── public/               # Static assets
 ```
 
