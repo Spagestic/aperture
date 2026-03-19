@@ -2,10 +2,9 @@
 
 import {
   IconDots,
-  IconFolder,
+  IconPencil,
   IconShare3,
   IconTrash,
-  type Icon,
 } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -26,13 +25,12 @@ import {
 } from "@/components/ui/sidebar";
 import Link from "next/link";
 
-export function NavDocuments({
+export function NavHistory({
   items,
 }: {
   items: {
     name: string;
     url: string;
-    icon: Icon;
   }[];
 }) {
   const { isMobile } = useSidebar();
@@ -41,15 +39,14 @@ export function NavDocuments({
     <SidebarGroup className="group-data-[collapsible=icon]:hidden">
       <SidebarGroupLabel>
         <Button size="xs" variant="ghost" className="-ml-2">
-          Recent
+          History
         </Button>
       </SidebarGroupLabel>
-      <SidebarMenu>
+      <SidebarMenu className="overflow-y-scroll [&::-webkit-scrollbar]:hidden">
         {items.map((item) => (
           <SidebarMenuItem key={item.name}>
             <SidebarMenuButton asChild size="sm">
               <Link href={item.url}>
-                <item.icon />
                 <span>{item.name}</span>
               </Link>
             </SidebarMenuButton>
@@ -69,8 +66,8 @@ export function NavDocuments({
                 align={isMobile ? "end" : "start"}
               >
                 <DropdownMenuItem>
-                  <IconFolder />
-                  <span>Open</span>
+                  <IconPencil />
+                  <span>Rename</span>
                 </DropdownMenuItem>
                 <DropdownMenuItem>
                   <IconShare3 />

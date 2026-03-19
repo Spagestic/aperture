@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import { IconShare3 } from "@tabler/icons-react";
+import { IconShare3, IconBell } from "@tabler/icons-react";
 import { Searchbar } from "./search-bar";
 
 export function SiteHeader() {
@@ -17,6 +17,9 @@ export function SiteHeader() {
         </div>
         <Searchbar />
         <div className=" flex items-center gap-2">
+          <Button variant="ghost" size="sm">
+            <IconBell />
+          </Button>
           <Button variant="ghost" size="sm">
             <IconShare3 />
             <span className="hidden lg:inline">Share</span>

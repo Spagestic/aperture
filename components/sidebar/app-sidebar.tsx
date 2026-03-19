@@ -2,26 +2,19 @@
 
 import * as React from "react";
 import {
-  IconAlertCircle,
   IconCalendarFilled,
-  IconCamera,
   IconChartBar,
   IconDatabase,
-  IconFileAi,
-  IconFileDescription,
   IconFileWord,
   IconFolder,
-  IconHelp,
-  IconHome,
   IconListDetails,
-  IconNews,
   IconReport,
-  IconSettings,
 } from "@tabler/icons-react";
 import Image from "next/image";
-import { NavDocuments } from "@/components/sidebar/nav-documents";
 import { NavMain } from "@/components/sidebar/nav-main";
-import { NavSecondary } from "@/components/sidebar/nav-secondary";
+import { NavDocuments } from "@/components/sidebar/nav-documents";
+import { NavHistory } from "@/components/sidebar/nav-history";
+import {} from "@/components/sidebar/nav-secondary";
 import { NavUser } from "@/components/sidebar/nav-user";
 import {
   Sidebar,
@@ -37,99 +30,24 @@ import Link from "next/link";
 const data = {
   navMain: [
     {
-      title: "Dashboard",
-      url: "#",
-      icon: IconHome,
-    },
-    {
       title: "Watchlist",
-      url: "/watchlist",
+      url: "#",
       icon: IconListDetails,
     },
     {
-      title: "Companies",
-      url: "/companies",
-      icon: IconChartBar,
-    },
-    {
-      title: "Filings",
+      title: "Documents",
       url: "#",
       icon: IconFolder,
     },
     {
-      title: "News",
+      title: "Screeners",
       url: "#",
-      icon: IconNews,
+      icon: IconChartBar,
     },
     {
       title: "Calendar",
       url: "#",
       icon: IconCalendarFilled,
-    },
-  ],
-  navClouds: [
-    {
-      title: "Capture",
-      icon: IconCamera,
-      isActive: true,
-      url: "#",
-      items: [
-        {
-          title: "Active Proposals",
-          url: "#",
-        },
-        {
-          title: "Archived",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Proposal",
-      icon: IconFileDescription,
-      url: "#",
-      items: [
-        {
-          title: "Active Proposals",
-          url: "#",
-        },
-        {
-          title: "Archived",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Prompts",
-      icon: IconFileAi,
-      url: "#",
-      items: [
-        {
-          title: "Active Proposals",
-          url: "#",
-        },
-        {
-          title: "Archived",
-          url: "#",
-        },
-      ],
-    },
-  ],
-  navSecondary: [
-    {
-      title: "Alerts",
-      url: "#",
-      icon: IconAlertCircle,
-    },
-    {
-      title: "Settings",
-      url: "#",
-      icon: IconSettings,
-    },
-    {
-      title: "Help & Support",
-      url: "#",
-      icon: IconHelp,
     },
   ],
   documents: [
@@ -147,6 +65,34 @@ const data = {
       name: "Word Assistant",
       url: "#",
       icon: IconFileWord,
+    },
+    {
+      name: "Earnings Call Summaries",
+      url: "#",
+      icon: IconReport,
+    },
+    ,
+  ],
+  history: [
+    {
+      name: "compare Apple and Microsoft gross margin over 5 years",
+      url: "#",
+    },
+    {
+      name: "what changed in NVIDIA’s latest 8-K filing?",
+      url: "#",
+    },
+    {
+      name: "summarize the latest TSM transcript",
+      url: "#",
+    },
+    {
+      name: "show 2024 filings mentioning tariffs",
+      url: "#",
+    },
+    {
+      name: "what are the top holdings in ARKK ETF?",
+      url: "#",
     },
   ],
 };
@@ -176,10 +122,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
-      <SidebarContent>
+      <SidebarContent className="overflow-y-scroll [&::-webkit-scrollbar]:hidden">
         <NavMain items={data.navMain} />
         <NavDocuments items={data.documents} />
-        <NavSecondary items={data.navSecondary} className="mt-auto" />
+        <NavHistory items={data.history} />
       </SidebarContent>
       <SidebarFooter>
         <NavUser />

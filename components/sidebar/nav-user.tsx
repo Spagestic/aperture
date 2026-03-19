@@ -5,6 +5,9 @@ import {
   LoaderIcon,
   UserCircle,
   ScrollText,
+  SlidersVertical,
+  Settings,
+  Info,
   Lock,
   LogOut,
 } from "lucide-react";
@@ -133,12 +136,31 @@ export function NavUser() {
               <DropdownMenuItem asChild>
                 <Link href="/profile">
                   <UserCircle />
-                  Profile
+                  Account
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link href="/profile">
+                  <SlidersVertical />
+                  Preferences
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link href="/profile">
+                  <Settings />
+                  All Settings
                 </Link>
               </DropdownMenuItem>
             </DropdownMenuGroup>
+
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
+              <DropdownMenuItem asChild>
+                <Link href="/terms">
+                  <Info />
+                  Help & Support
+                </Link>
+              </DropdownMenuItem>
               <DropdownMenuItem asChild>
                 <Link href="/terms">
                   <ScrollText />
