@@ -4,7 +4,9 @@ import type { Quote } from "yahoo-finance2/modules/quote";
 import type { QuoteSummaryModules } from "yahoo-finance2/modules/quoteSummary";
 import type { QuoteSummaryResult } from "yahoo-finance2/modules/quoteSummary-iface";
 
-const yahooFinance = new YahooFinance();
+const yahooFinance = new YahooFinance({
+  suppressNotices: ["yahooSurvey"],
+});
 
 const MARKET_STRIP = [
   { id: "sp500", label: "S&P 500", symbol: "^GSPC" },

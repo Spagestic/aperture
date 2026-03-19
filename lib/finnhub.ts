@@ -1,5 +1,7 @@
 import YahooFinance from "yahoo-finance2";
-const yahooFinance = new YahooFinance();
+const yahooFinance = new YahooFinance({
+  suppressNotices: ["yahooSurvey"],
+});
 
 const FINNHUB_API_KEY = process.env.NEXT_PUBLIC_FINNHUB_API_KEY;
 const BASE_URL = "https://finnhub.io/api/v1";
@@ -7,7 +9,7 @@ const BASE_URL = "https://finnhub.io/api/v1";
 export async function getQuote(ticker: string) {
   const res = await fetch(
     `${BASE_URL}/quote?symbol=${ticker}&token=${FINNHUB_API_KEY}`,
-    { next: { revalidate: 30 } }
+    { next: { revalidate: 30 } },
   );
   return res.json();
 }
@@ -15,7 +17,7 @@ export async function getQuote(ticker: string) {
 export async function getCompanyProfile(ticker: string) {
   const res = await fetch(
     `${BASE_URL}/stock/profile2?symbol=${ticker}&token=${FINNHUB_API_KEY}`,
-    { next: { revalidate: 3600 } }
+    { next: { revalidate: 3600 } },
   );
   return res.json();
 }
@@ -28,13 +30,13 @@ export async function getCandles(ticker: string, range: string = "1Y") {
 
     switch (range) {
       case "1D":
-  period1 = new Date(Date.now() - 1 * 24 * 60 * 60 * 1000);
-  interval = "1h";
-  break;
-case "5D":
-  period1 = new Date(Date.now() - 5 * 24 * 60 * 60 * 1000);
-  interval = "1h";
-  break;
+        period1 = new Date(Date.now() - 1 * 24 * 60 * 60 * 1000);
+        interval = "1h";
+        break;
+      case "5D":
+        period1 = new Date(Date.now() - 5 * 24 * 60 * 60 * 1000);
+        interval = "1h";
+        break;
       case "1W":
         period1 = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
         interval = "1h";
@@ -67,7 +69,7 @@ case "5D":
         period2: now,
         interval,
       },
-      { validateResult: false }
+      { validateResult: false },
     )) as {
       quotes: Array<{
         date: Date | string;
