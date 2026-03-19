@@ -5,7 +5,8 @@ import {
   upcomingEvents,
   watchlist,
 } from "./components/data";
-import { MarketStrip } from "./components/market-strip";
+import { getDashboardMarketStrip } from "@/lib/providers/yahoo";
+import { MarketStripClient } from "./components/market-strip-client";
 import { MarketSummary } from "./components/market-summary";
 import { LatestFilingsSection } from "./components/filings";
 import { UpcomingEventsSection } from "./components/upcoming";
@@ -36,4 +37,10 @@ export default function Page() {
       </div>
     </>
   );
+}
+
+export async function MarketStrip() {
+  const marketData = await getDashboardMarketStrip();
+
+  return <MarketStripClient initialData={marketData} />;
 }

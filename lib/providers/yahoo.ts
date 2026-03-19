@@ -3,6 +3,7 @@ import YahooFinance from "yahoo-finance2";
 import type { Quote } from "yahoo-finance2/modules/quote";
 import type { QuoteSummaryModules } from "yahoo-finance2/modules/quoteSummary";
 import type { QuoteSummaryResult } from "yahoo-finance2/modules/quoteSummary-iface";
+import type { MarketStripItem as DashboardMarketStripItem } from "@/types/dashboard";
 
 const yahooFinance = new YahooFinance({
   suppressNotices: ["yahooSurvey"],
@@ -61,6 +62,25 @@ export type CompanyData = {
   profile: { longName: string; shortName: string };
 };
 
+type DashboardMarketStripConfig = {
+  id: string;
+  label: string;
+  symbol: string;
+};
+
+const DASHBOARD_MARKET_STRIP = [
+  { id: "sp500", label: "S&P 500", symbol: "^GSPC" },
+  { id: "nasdaq", label: "Nasdaq", symbol: "^IXIC" },
+  { id: "russell2000", label: "Russell 2000", symbol: "^RUT" },
+  { id: "us10y", label: "US 10Y", symbol: "^TNX" },
+  { id: "dxy", label: "DXY", symbol: "DX-Y.NYB" },
+  { id: "wti", label: "WTI", symbol: "CL=F" },
+  { id: "brent", label: "Brent", symbol: "BZ=F" },
+  { id: "gold", label: "Gold", symbol: "GC=F" },
+  { id: "btc", label: "BTC", symbol: "BTC-USD" },
+  { id: "vix", label: "VIX", symbol: "^VIX" },
+] as const satisfies readonly DashboardMarketStripConfig[];
+
 function normalizeQuote(quote: Quote): YahooQuote {
   return {
     symbol: quote.symbol,
@@ -87,6 +107,22 @@ function formatMarketChange(value: number): string {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   }).format(value)}%`;
+}
+
+function normalizeDashboardMarketStripItem(
+  item: DashboardMarketStripConfig,
+  data: Awaited<ReturnType<typeof getYahooCompanyData>>,
+): DashboardMarketStripItem {
+  return {
+    id: item.id,
+    label: item.label,
+    symbol: item.symbol,
+    price: data.quote.regularMarketPrice,
+    change: data.quote.regularMarketChange,
+    changePercent: data.quote.regularMarketChangePercent,
+    source: "yahoo",
+    updatedAt: Date.now(),
+  };
 }
 
 async function fetchMarketStripItem(
@@ -163,4 +199,27 @@ export async function getYahooCompanyData(
  */
 export async function getMarketStrip(): Promise<MarketStripItem[]> {
   return Promise.all(MARKET_STRIP.map(fetchMarketStripItem));
+}
+
+/**
+ * Fetch the dashboard market strip data used by the API route and SWR refresh.
+ */
+export async function getDashboardMarketStrip(): Promise<DashboardMarketStripItem[]> {
+  const results = await Promise.allSettled(
+    DASHBOARD_MARKET_STRIP.map(async (item) => {
+      const data = await getYahooCompanyData(item.symbol);
+      return normalizeDashboardMarketStripItem(item, data);
+    }),
+  );
+
+  return results
+    .filter((result): result is PromiseFulfilledResult<DashboardMarketStripItem> => {
+      if (result.status === "rejected") {
+        console.error("Yahoo market strip error:", result.reason);
+        return false;
+      }
+
+      return true;
+    })
+    .map((result) => result.value);
 }
