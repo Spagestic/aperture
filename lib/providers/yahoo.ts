@@ -1,8 +1,12 @@
 "use server";
 import YahooFinance from "yahoo-finance2";
 import type { Quote } from "yahoo-finance2/modules/quote";
-import type { QuoteSummaryModules } from "yahoo-finance2/modules/quoteSummary";
-import type { QuoteSummaryResult } from "yahoo-finance2/modules/quoteSummary-iface";
+import type {
+  FundamentalsTimeSeriesBalanceSheetResult,
+  FundamentalsTimeSeriesCashFlowResult,
+  FundamentalsTimeSeriesFinancialsResult,
+  FundamentalsTimeSeriesResult,
+} from "yahoo-finance2/modules/fundamentalsTimeSeries";
 import type { MarketStripItem as DashboardMarketStripItem } from "@/types/dashboard";
 
 const yahooFinance = new YahooFinance({
@@ -31,14 +35,6 @@ export type MarketStripItem = MarketStripConfig & {
   flat: boolean;
 };
 
-const SUMMARY_MODULES = [
-  "price",
-  "summaryProfile",
-  "incomeStatementHistory",
-  "balanceSheetHistory",
-  "cashflowStatementHistory",
-] as const satisfies QuoteSummaryModules[];
-
 export type YahooQuote = {
   symbol: string;
   regularMarketPrice: number;
@@ -50,10 +46,15 @@ export type YahooQuote = {
   dividendYield?: number;
 };
 
+export type YahooFinancialStatementSeries = {
+  financials: FundamentalsTimeSeriesFinancialsResult[];
+  balanceSheet: FundamentalsTimeSeriesBalanceSheetResult[];
+  cashflow: FundamentalsTimeSeriesCashFlowResult[];
+};
+
 export type YahooFinancials = {
-  incomeStatementHistory?: QuoteSummaryResult["incomeStatementHistory"];
-  balanceSheetHistory?: QuoteSummaryResult["balanceSheetHistory"];
-  cashflowStatementHistory?: QuoteSummaryResult["cashflowStatementHistory"];
+  quarterly: YahooFinancialStatementSeries;
+  annual: YahooFinancialStatementSeries;
 };
 
 export type CompanyData = {
@@ -107,6 +108,59 @@ function formatMarketChange(value: number): string {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   }).format(value)}%`;
+}
+
+const FUNDAMENTALS_LOOKBACK_START = (() => {
+  const date = new Date();
+  date.setFullYear(date.getFullYear() - 10);
+  return date;
+})();
+
+function emptyFinancialStatementSeries(): YahooFinancialStatementSeries {
+  return {
+    financials: [],
+    balanceSheet: [],
+    cashflow: [],
+  };
+}
+
+function collectFinancialStatementSeries(
+  results: FundamentalsTimeSeriesResult[],
+): YahooFinancialStatementSeries {
+  const series = emptyFinancialStatementSeries();
+
+  for (const result of results) {
+    if (result.TYPE === "FINANCIALS" || result.TYPE === "ALL") {
+      series.financials.push(result as FundamentalsTimeSeriesFinancialsResult);
+    }
+
+    if (result.TYPE === "BALANCE_SHEET" || result.TYPE === "ALL") {
+      series.balanceSheet.push(
+        result as FundamentalsTimeSeriesBalanceSheetResult,
+      );
+    }
+
+    if (result.TYPE === "CASH_FLOW" || result.TYPE === "ALL") {
+      series.cashflow.push(result as FundamentalsTimeSeriesCashFlowResult);
+    }
+  }
+
+  return series;
+}
+
+async function fetchFinancialStatementSeries(
+  ticker: string,
+  type: "quarterly" | "annual",
+): Promise<YahooFinancialStatementSeries> {
+  const results = await yahooFinance.fundamentalsTimeSeries(ticker, {
+    period1: FUNDAMENTALS_LOOKBACK_START,
+    type,
+    module: "all",
+    merge: false,
+    padTimeSeries: true,
+  });
+
+  return collectFinancialStatementSeries(results);
 }
 
 function normalizeDashboardMarketStripItem(
@@ -171,25 +225,37 @@ export async function getYahooCompanyData(
     throw new Error("Ticker is required");
   }
 
-  const [quote, summary] = await Promise.all([
-    yahooFinance.quote(normalizedTicker) as Promise<Quote>,
-    yahooFinance.quoteSummary(normalizedTicker, {
-      modules: [...SUMMARY_MODULES],
-    }) as Promise<QuoteSummaryResult>,
-  ]);
+  const [quoteResult, quarterlyResult, annualResult] = await Promise.allSettled(
+    [
+      yahooFinance.quote(normalizedTicker) as Promise<Quote>,
+      fetchFinancialStatementSeries(normalizedTicker, "quarterly"),
+      fetchFinancialStatementSeries(normalizedTicker, "annual"),
+    ],
+  );
 
-  const profileSource = summary.price ?? quote;
+  if (quoteResult.status === "rejected") {
+    throw quoteResult.reason;
+  }
+
+  const quote = quoteResult.value;
+  const quarterly =
+    quarterlyResult.status === "fulfilled"
+      ? quarterlyResult.value
+      : emptyFinancialStatementSeries();
+  const annual =
+    annualResult.status === "fulfilled"
+      ? annualResult.value
+      : emptyFinancialStatementSeries();
 
   return {
     quote: normalizeQuote(quote),
     financials: {
-      incomeStatementHistory: summary.incomeStatementHistory,
-      balanceSheetHistory: summary.balanceSheetHistory,
-      cashflowStatementHistory: summary.cashflowStatementHistory,
+      quarterly,
+      annual,
     },
     profile: {
-      longName: profileSource.longName ?? normalizedTicker,
-      shortName: profileSource.shortName ?? normalizedTicker,
+      longName: quote.longName ?? normalizedTicker,
+      shortName: quote.shortName ?? normalizedTicker,
     },
   };
 }
@@ -204,7 +270,9 @@ export async function getMarketStrip(): Promise<MarketStripItem[]> {
 /**
  * Fetch the dashboard market strip data used by the API route and SWR refresh.
  */
-export async function getDashboardMarketStrip(): Promise<DashboardMarketStripItem[]> {
+export async function getDashboardMarketStrip(): Promise<
+  DashboardMarketStripItem[]
+> {
   const results = await Promise.allSettled(
     DASHBOARD_MARKET_STRIP.map(async (item) => {
       const data = await getYahooCompanyData(item.symbol);
@@ -213,13 +281,15 @@ export async function getDashboardMarketStrip(): Promise<DashboardMarketStripIte
   );
 
   return results
-    .filter((result): result is PromiseFulfilledResult<DashboardMarketStripItem> => {
-      if (result.status === "rejected") {
-        console.error("Yahoo market strip error:", result.reason);
-        return false;
-      }
+    .filter(
+      (result): result is PromiseFulfilledResult<DashboardMarketStripItem> => {
+        if (result.status === "rejected") {
+          console.error("Yahoo market strip error:", result.reason);
+          return false;
+        }
 
-      return true;
-    })
+        return true;
+      },
+    )
     .map((result) => result.value);
 }
