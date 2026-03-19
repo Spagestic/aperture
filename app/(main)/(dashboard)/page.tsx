@@ -7,7 +7,9 @@ import {
 } from "./components/data";
 import { MarketStrip } from "./components/market-strip";
 import { MarketSummary } from "./components/market-summary";
-import { RightRail } from "./components/right-rail";
+import { LatestFilingsSection } from "./components/filings";
+import { UpcomingEventsSection } from "./components/upcoming";
+import { WatchlistSection } from "./components/watchlist";
 
 export default function Page() {
   return (
@@ -22,11 +24,11 @@ export default function Page() {
             <MarketSummary items={marketSummary} />
           </div>
           {/* Right rail */}
-          <RightRail
-            watchlist={watchlist}
-            upcomingEvents={upcomingEvents}
-            latestFilings={latestFilings}
-          />
+          <aside className="space-y-4">
+            <WatchlistSection watchlist={watchlist} />
+            <UpcomingEventsSection upcomingEvents={upcomingEvents} />
+            <LatestFilingsSection latestFilings={latestFilings} />
+          </aside>
         </div>
       </div>
       <div className="fixed bottom-4 left-4 right-4 z-5 transition-[left,right,width] duration-200 ease-linear md:left-[calc(var(--sidebar-width)+1.5rem)] md:right-6 md:group-data-[state=collapsed]/sidebar-wrapper:left-[calc(var(--sidebar-width-icon)+1.5rem)] xl:right-102 motion-reduce:transition-none">
