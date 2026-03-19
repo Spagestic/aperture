@@ -1,3 +1,4 @@
+// /app/api/fmp/[ticker]/route.ts
 import { NextRequest, NextResponse } from "next/server";
 
 const BASE_URL = "https://financialmodelingprep.com/stable";

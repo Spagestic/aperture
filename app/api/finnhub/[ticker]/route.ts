@@ -1,3 +1,4 @@
+// /app/api/finnhub/[ticker]/route.ts
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextRequest, NextResponse } from "next/server";
 
