@@ -1,11 +1,4 @@
-import React from "react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { RightRail } from "../../(dashboard)/components/right-rail";
-import {
-  latestFilings,
-  upcomingEvents,
-  watchlist,
-} from "../../(dashboard)/components/data";
 import Link from "next/link";
 import { Star } from "lucide-react";
 
@@ -14,6 +7,7 @@ import { CompanyLogo } from "@/components/CompanyLogo";
 import { Button } from "@/components/ui/button";
 import { getDemoCompanyFinancialPayload } from "@/lib/financial-dashboard";
 import { fetchCompanyFinancials } from "@/lib/company-financials-api";
+import CompanyCard from "./company-card";
 
 interface CompanyLayoutProps {
   children: ReactNode;
@@ -98,11 +92,9 @@ export default async function CompanyLayout({
           <div className="pt-4">{children}</div>
         </div>
         {/* Right Side */}
-        <RightRail
-          watchlist={watchlist}
-          upcomingEvents={upcomingEvents}
-          latestFilings={latestFilings}
-        />
+        <div className="space-y-6">
+          <CompanyCard profile={profile} />
+        </div>
       </div>
     </div>
   );
