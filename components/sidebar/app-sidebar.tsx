@@ -71,7 +71,6 @@ const data = {
       url: "#",
       icon: IconReport,
     },
-    ,
   ],
   history: [
     {
