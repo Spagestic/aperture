@@ -29,7 +29,7 @@ type FinnhubCandleResponse = {
 
 async function fetchStockPrice(
   ticker: string,
-  type: "stocks" | "etfs"
+  type: "stocks" | "etfs",
 ): Promise<StockPriceResponse | null> {
   const url = `${STOCK_PRICES_BASE}/api/${type}/${ticker}`;
   const res = await fetch(url);
@@ -38,10 +38,7 @@ async function fetchStockPrice(
   return data?.Ticker ? data : null;
 }
 
-async function fetchFinnhub<T>(
-  path: string,
-  token: string
-): Promise<T | null> {
+async function fetchFinnhub<T>(path: string, token: string): Promise<T | null> {
   const url = `${FINNHUB_BASE}${path}${path.includes("?") ? "&" : "?"}token=${token}`;
   const res = await fetch(url);
   if (!res.ok) return null;
@@ -94,7 +91,7 @@ export const getMarketPulse = action({
         token
           ? fetchFinnhub<FinnhubCandleResponse>(
               `/stock/candle?symbol=${dataTicker}&resolution=D&from=${fromSec}&to=${nowSec}`,
-              token
+              token,
             )
           : Promise.resolve(null),
       ]);
@@ -125,7 +122,7 @@ export const getMarketNews = action({
     if (!token) return [];
     const data = await fetchFinnhub<FinnhubNewsItem[]>(
       "/news?category=general",
-      token
+      token,
     );
     if (!Array.isArray(data) || data.length === 0) return [];
     return data.slice(0, 8).map((item, i) => toSummaryItem(item, i));
@@ -145,10 +142,9 @@ export const getUpcomingEarnings = action({
     to.setDate(to.getDate() + 14);
     const fromStr = from.toISOString().slice(0, 10);
     const toStr = to.toISOString().slice(0, 10);
-    const data = await fetchFinnhub<{ earningsCalendar?: FinnhubEarningsItem[] }>(
-      `/calendar/earnings?from=${fromStr}&to=${toStr}`,
-      token
-    );
+    const data = await fetchFinnhub<{
+      earningsCalendar?: FinnhubEarningsItem[];
+    }>(`/calendar/earnings?from=${fromStr}&to=${toStr}`, token);
     const calendar = data?.earningsCalendar;
     if (!Array.isArray(calendar) || calendar.length === 0) return [];
     return calendar.slice(0, 10).map(toUpcomingEvent);
@@ -167,7 +163,7 @@ export const getLatestFilings = action({
     for (const ticker of WATCHLIST_TICKERS) {
       const data = await fetchFinnhub<FinnhubFilingItem[]>(
         `/stock/filings?symbol=${ticker}`,
-        token
+        token,
       );
       if (Array.isArray(data) && data.length > 0) {
         const item = data[0];
@@ -192,91 +188,93 @@ export type DashboardData = {
 export const getDashboardData = action({
   args: {},
   handler: async (): Promise<DashboardData> => {
-    const [watchlist, marketPulse, marketSummary, upcomingEvents, latestFilings] =
-      await Promise.all([
-        (async () => {
-          const results: WatchlistItem[] = [];
-          for (const ticker of WATCHLIST_TICKERS) {
-            const data = await fetchStockPrice(ticker, "stocks");
-            if (data) results.push(toWatchlistItem(data));
-          }
-          return results;
-        })(),
-        (async () => {
-          const results: MarketPulseItem[] = [];
-          const token = process.env.FINNHUB_API_KEY;
-          const nowSec = Math.floor(Date.now() / 1000);
-          const fromSec = nowSec - 60 * 60 * 24 * 30;
+    const [
+      watchlist,
+      marketPulse,
+      marketSummary,
+      upcomingEvents,
+      latestFilings,
+    ] = await Promise.all([
+      (async () => {
+        const results: WatchlistItem[] = [];
+        for (const ticker of WATCHLIST_TICKERS) {
+          const data = await fetchStockPrice(ticker, "stocks");
+          if (data) results.push(toWatchlistItem(data));
+        }
+        return results;
+      })(),
+      (async () => {
+        const results: MarketPulseItem[] = [];
+        const token = process.env.FINNHUB_API_KEY;
+        const nowSec = Math.floor(Date.now() / 1000);
+        const fromSec = nowSec - 60 * 60 * 24 * 30;
 
-          for (const { dataTicker, routeTicker, title } of MARKET_PULSE_ETFS) {
-            const [quote, candles] = await Promise.all([
-              fetchStockPrice(dataTicker, "etfs"),
-              token
-                ? fetchFinnhub<FinnhubCandleResponse>(
-                    `/stock/candle?symbol=${dataTicker}&resolution=D&from=${fromSec}&to=${nowSec}`,
-                    token
-                  )
-                : Promise.resolve(null),
-            ]);
-            if (!quote) continue;
-
-            let sparkline: number[] | undefined;
-            if (candles && candles.s === "ok" && Array.isArray(candles.c)) {
-              const closes = candles.c;
-              const slice =
-                closes.length > 10 ? closes.slice(closes.length - 10) : closes;
-              sparkline = slice;
-            }
-
-            results.push(toMarketPulseItem(quote, title, routeTicker, sparkline));
-          }
-          return results;
-        })(),
-        (async () => {
-          const token = process.env.FINNHUB_API_KEY;
-          if (!token) return [];
-          const data = await fetchFinnhub<FinnhubNewsItem[]>(
-            "/news?category=general",
+        for (const { dataTicker, routeTicker, title } of MARKET_PULSE_ETFS) {
+          const [quote, candles] = await Promise.all([
+            fetchStockPrice(dataTicker, "etfs"),
             token
-          );
-          if (!Array.isArray(data) || data.length === 0) return [];
-          return data.slice(0, 8).map((item, i) => toSummaryItem(item, i));
-        })(),
-        (async () => {
-          const token = process.env.FINNHUB_API_KEY;
-          if (!token) return [];
-          const from = new Date();
-          const to = new Date();
-          to.setDate(to.getDate() + 14);
-          const fromStr = from.toISOString().slice(0, 10);
-          const toStr = to.toISOString().slice(0, 10);
-          const data = await fetchFinnhub<{
-            earningsCalendar?: FinnhubEarningsItem[];
-          }>(
-            `/calendar/earnings?from=${fromStr}&to=${toStr}`,
-            token
-          );
-          const calendar = data?.earningsCalendar;
-          if (!Array.isArray(calendar) || calendar.length === 0) return [];
-          return calendar.slice(0, 10).map(toUpcomingEvent);
-        })(),
-        (async () => {
-          const token = process.env.FINNHUB_API_KEY;
-          if (!token) return [];
-          const all: FilingItem[] = [];
-          for (const ticker of WATCHLIST_TICKERS) {
-            const data = await fetchFinnhub<FinnhubFilingItem[]>(
-              `/stock/filings?symbol=${ticker}`,
-              token
-            );
-            if (Array.isArray(data) && data.length > 0) {
-              const item = data[0];
-              if (item) all.push(toFilingItem(item, ticker));
-            }
+              ? fetchFinnhub<FinnhubCandleResponse>(
+                  `/stock/candle?symbol=${dataTicker}&resolution=D&from=${fromSec}&to=${nowSec}`,
+                  token,
+                )
+              : Promise.resolve(null),
+          ]);
+          if (!quote) continue;
+
+          let sparkline: number[] | undefined;
+          if (candles && candles.s === "ok" && Array.isArray(candles.c)) {
+            const closes = candles.c;
+            const slice =
+              closes.length > 10 ? closes.slice(closes.length - 10) : closes;
+            sparkline = slice;
           }
-          return all.slice(0, 8);
-        })(),
-      ]);
+
+          results.push(toMarketPulseItem(quote, title, routeTicker, sparkline));
+        }
+        return results;
+      })(),
+      (async () => {
+        const token = process.env.FINNHUB_API_KEY;
+        if (!token) return [];
+        const data = await fetchFinnhub<FinnhubNewsItem[]>(
+          "/news?category=general",
+          token,
+        );
+        if (!Array.isArray(data) || data.length === 0) return [];
+        return data.slice(0, 8).map((item, i) => toSummaryItem(item, i));
+      })(),
+      (async () => {
+        const token = process.env.FINNHUB_API_KEY;
+        if (!token) return [];
+        const from = new Date();
+        const to = new Date();
+        to.setDate(to.getDate() + 14);
+        const fromStr = from.toISOString().slice(0, 10);
+        const toStr = to.toISOString().slice(0, 10);
+        const data = await fetchFinnhub<{
+          earningsCalendar?: FinnhubEarningsItem[];
+        }>(`/calendar/earnings?from=${fromStr}&to=${toStr}`, token);
+        const calendar = data?.earningsCalendar;
+        if (!Array.isArray(calendar) || calendar.length === 0) return [];
+        return calendar.slice(0, 10).map(toUpcomingEvent);
+      })(),
+      (async () => {
+        const token = process.env.FINNHUB_API_KEY;
+        if (!token) return [];
+        const all: FilingItem[] = [];
+        for (const ticker of WATCHLIST_TICKERS) {
+          const data = await fetchFinnhub<FinnhubFilingItem[]>(
+            `/stock/filings?symbol=${ticker}`,
+            token,
+          );
+          if (Array.isArray(data) && data.length > 0) {
+            const item = data[0];
+            if (item) all.push(toFilingItem(item, ticker));
+          }
+        }
+        return all.slice(0, 8);
+      })(),
+    ]);
     return {
       watchlist,
       marketPulse,
