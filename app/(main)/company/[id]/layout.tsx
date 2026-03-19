@@ -2,25 +2,26 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Link from "next/link";
 import { Star } from "lucide-react";
 
-import { ReactNode } from "react";
+import { ReactNode, Suspense } from "react";
 import { CompanyLogo } from "@/components/CompanyLogo";
 import { Button } from "@/components/ui/button";
 import { getDemoCompanyFinancialPayload } from "@/lib/financial-dashboard";
 import { fetchCompanyFinancials } from "@/lib/company-financials-api";
 import CompanyCard from "./company-card";
+import { cacheLife, cacheTag } from "next/cache";
 
 interface CompanyLayoutProps {
   children: ReactNode;
   params: Promise<{ id: string }>;
 }
 
-export default async function CompanyLayout({
-  children,
-  params,
-}: CompanyLayoutProps) {
-  const { id } = await params;
+async function getCompanyPayload(ticker: string, id: string) {
+  "use cache";
+  cacheLife("hours");
+  cacheTag("company-financials");
+  cacheTag(`company:${ticker}`);
+
   const apiKey = process.env.ALPHA_VANTAGE_API_KEY;
-  const ticker = id.length <= 5 ? id.toUpperCase() : id;
 
   let payload = getDemoCompanyFinancialPayload(id);
   if (apiKey) {
@@ -30,6 +31,26 @@ export default async function CompanyLayout({
       payload = getDemoCompanyFinancialPayload(id);
     }
   }
+
+  return payload;
+}
+
+export default function CompanyLayout(props: CompanyLayoutProps) {
+  return (
+    <Suspense fallback={<div className="px-4 py-6 md:px-6">Loading…</div>}>
+      <CompanyLayoutContent {...props} />
+    </Suspense>
+  );
+}
+
+async function CompanyLayoutContent({
+  children,
+  params,
+}: CompanyLayoutProps) {
+  const { id } = await params;
+  const ticker = id.length <= 5 ? id.toUpperCase() : id;
+
+  const payload = await getCompanyPayload(ticker, id);
 
   const profile = payload.company;
 

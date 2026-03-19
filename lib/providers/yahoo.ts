@@ -1,4 +1,5 @@
 "use server";
+import { cacheLife, cacheTag } from "next/cache";
 import YahooFinance from "yahoo-finance2";
 import type { Quote } from "yahoo-finance2/modules/quote";
 import type {
@@ -41,6 +42,7 @@ export type YahooQuote = {
   regularMarketChange: number;
   regularMarketChangePercent: number;
   regularMarketVolume: number;
+  regularMarketTime?: number;
   marketCap?: number;
   trailingPE?: number;
   dividendYield?: number;
@@ -89,6 +91,10 @@ function normalizeQuote(quote: Quote): YahooQuote {
     regularMarketChange: quote.regularMarketChange ?? 0,
     regularMarketChangePercent: quote.regularMarketChangePercent ?? 0,
     regularMarketVolume: quote.regularMarketVolume ?? 0,
+    regularMarketTime:
+      quote.regularMarketTime instanceof Date
+        ? quote.regularMarketTime.getTime()
+        : undefined,
     marketCap: quote.marketCap,
     trailingPE: quote.trailingPE,
     dividendYield: quote.dividendYield,
@@ -175,7 +181,7 @@ function normalizeDashboardMarketStripItem(
     change: data.quote.regularMarketChange,
     changePercent: data.quote.regularMarketChangePercent,
     source: "yahoo",
-    updatedAt: Date.now(),
+    updatedAt: data.quote.regularMarketTime ?? 0,
   };
 }
 
@@ -273,6 +279,14 @@ export async function getMarketStrip(): Promise<MarketStripItem[]> {
 export async function getDashboardMarketStrip(): Promise<
   DashboardMarketStripItem[]
 > {
+  return getDashboardMarketStripCached();
+}
+
+async function getDashboardMarketStripCached(): Promise<DashboardMarketStripItem[]> {
+  "use cache";
+  cacheLife("minutes");
+  cacheTag("dashboard-market-strip");
+
   const results = await Promise.allSettled(
     DASHBOARD_MARKET_STRIP.map(async (item) => {
       const data = await getYahooCompanyData(item.symbol);
