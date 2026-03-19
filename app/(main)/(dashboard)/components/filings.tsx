@@ -2,6 +2,8 @@ import Link from "next/link";
 
 import { Card, CardContent } from "@/components/ui/card";
 import type { FilingItem } from "./data";
+import { ChevronRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 type LatestFilingsSectionProps = {
   latestFilings: FilingItem[];
@@ -39,8 +41,12 @@ export function LatestFilingsSection({
     <section>
       <div className="mb-2 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <h2 className="text-md font-medium">Latest filings</h2>
-          <span>›</span>
+          <Button size={"sm"} variant="ghost" className="" asChild>
+            <Link href={"#"}>
+              Latest Filings
+              <ChevronRight className="-ml-1" />
+            </Link>
+          </Button>
         </div>
       </div>
 

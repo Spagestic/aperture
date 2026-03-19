@@ -3,6 +3,8 @@ import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import type { UpcomingEvent } from "./data";
+import { Button } from "@/components/ui/button";
+import { ChevronRight } from "lucide-react";
 
 type UpcomingEventsSectionProps = {
   upcomingEvents: UpcomingEvent[];
@@ -50,8 +52,12 @@ export function UpcomingEventsSection({
     <section>
       <div className="mb-2 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <h2 className="text-md font-medium">Upcoming</h2>
-          <span>›</span>
+          <Button size={"sm"} variant="ghost" className="" asChild>
+            <Link href={"#"}>
+              Upcoming
+              <ChevronRight className="-ml-1" />
+            </Link>
+          </Button>
         </div>
       </div>
 
