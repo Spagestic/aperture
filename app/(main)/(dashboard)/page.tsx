@@ -6,7 +6,7 @@ import {
   watchlist,
 } from "./components/data";
 import { MarketStrip } from "./components/market-strip";
-import { MarketSummaryCard } from "./components/market-summary-card";
+import { MarketSummary } from "./components/market-summary";
 import { RightRail } from "./components/right-rail";
 
 export default function Page() {
@@ -19,7 +19,7 @@ export default function Page() {
         {/* Main center panel */}
         <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px] pt-4">
           <div className="mx-auto flex w-full max-w-7xl flex-col gap-6">
-            <MarketSummaryCard items={marketSummary} />
+            <MarketSummary items={marketSummary} />
           </div>
           {/* Right rail */}
           <RightRail

@@ -7,11 +7,11 @@ import {
 
 import type { SummaryItem } from "./data";
 
-type MarketSummaryCardProps = {
+type MarketSummaryProps = {
   items: SummaryItem[];
 };
 
-export function MarketSummaryCard({ items }: MarketSummaryCardProps) {
+export function MarketSummary({ items }: MarketSummaryProps) {
   return (
     <div className="">
       <div className="pb-2 mx-2 flex items-center justify-between gap-2">
