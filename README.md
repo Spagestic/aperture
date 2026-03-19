@@ -1,12 +1,12 @@
-# Aperture - Open Financial Intelligence
+# Aperture — Open Financial Intelligence
 
 <div align="center">
 
-**A modern, AI-powered financial terminal for everyone**
+**An AI-native financial research terminal for everyone**
 
-Making professional-grade financial data and insights accessible without the Bloomberg price tag.
+Aperture is a modern web-based alternative to expensive financial terminals: clean market data, searchable filings, structured financials, document chat, alerts, and research workflows — all in one place.
 
-[Features](#features) • [Tech Stack](#tech-stack) • [Getting Started](#getting-started) • [Documentation](#documentation)
+[Vision](#-project-vision) • [Features](#-core-features) • [Dashboard](#-dashboard-layout) • [Tech Stack](#-tech-stack) • [Getting Started](#-getting-started)
 
 </div>
 
@@ -14,64 +14,314 @@ Making professional-grade financial data and insights accessible without the Blo
 
 ## 🎯 Project Vision
 
-Bloomberg Terminal costs $24,000/year. Most investors don't need all its features, just clean data, smart insights, and an intuitive interface.
+Traditional financial terminals are powerful, but expensive, dense, and often overbuilt for students, independent investors, startup teams, and many professionals who just need the essentials done well.
 
-**Aperture** democratizes financial intelligence by providing:
+**Aperture** aims to make core financial intelligence accessible through a more intuitive, AI-first interface.
 
-- 🔍 Intelligent search across company filings and reports
-- 📊 Clean, unified financial dashboards
-- 🤖 AI-powered insights and analysis
-- 📰 Categorized news with sentiment analysis
-- 🔔 Real-time alerts and subscriptions
-- 📈 Advanced analytics without the complexity
+### Aperture is designed around 5 core workflows:
+
+- **Monitor** markets, watchlists, filings, and catalysts
+- **Investigate** companies through source documents and structured metrics
+- **Compare** companies, trends, and valuation multiples
+- **Search** across filings, annual reports, press releases, and transcripts
+- **Ask** natural-language questions grounded in real financial documents
+
+Instead of being just another finance news site or chatbot, Aperture is being built as a **research terminal**.
 
 ---
 
 ## ✨ Core Features
 
-### 1. **Intelligent Search Engine**
+### 1. Universal Financial Search
 
-- Full-text and semantic search across annual reports, 10-Ks, press releases
-- AI-powered context extraction from PDF documents
-- Filter by company, year, document type, and financial metrics
-- Natural language queries: _"Show me Apple's revenue growth concerns from 2023"_
+Search across:
 
-### 2. **Unified Financial Dashboard**
+- public companies
+- annual reports / 10-K / 10-Q
+- press releases
+- earnings transcripts
+- financial metrics
+- people, topics, and themes
 
-- Multi-year financials (2020-2024) displayed side-by-side
-- Tabbed interface: Income Statement | Balance Sheet | Cash Flow | Key Metrics
-- Interactive charts for trend analysis
-- Compare multiple companies simultaneously
-- Export to Excel/CSV
+Examples:
 
-### 3. **AI Analytics & Insights**
+- `What changed in NVIDIA's latest 8-K?`
+- `Apple gross margin trend over 5 years`
+- `10-Ks mentioning tariffs in 2024`
+- `Semiconductor companies with high FCF margin`
 
-- **Auto-calculated metrics**: P/E, ROE, ROA, Debt-to-Equity, margins, and more
-- **LLM-powered analysis**: Trend detection, red flags, bull/bear cases
-- **Predictive analytics**: Revenue forecasts and anomaly detection
-- **Plain-English explanations** of complex financials
+### 2. Financial Documents in Markdown
 
-### 4. **Multi-Source Data Aggregation**
+One of Aperture’s core product features is turning hard-to-read financial documents into something searchable and AI-friendly.
 
-- Annual & quarterly reports (10-K, 10-Q)
-- SEC filings (8-K, insider transactions)
-- Press releases and earnings call transcripts
-- Real-time news from multiple sources
-- Social sentiment analysis (optional)
+Supported workflow:
 
-### 5. **Smart News Categorization**
+- discover and fetch filings / reports / PDFs
+- extract text with OCR
+- convert into clean markdown
+- preserve sections, headings, and tables
+- search within documents
+- chat with a single document or a company’s document set
+- cite exact passages and source sections
 
-- AI-categorized news: Earnings, Products, M&A, Legal, Management
-- Sentiment scoring and event impact analysis
-- **News-to-data linking**: Connect press releases to financial trends
-- Timeline view of company events
+### 3. Company Research Workspace
 
-### 6. **Subscription & Alerts**
+Each company page is designed as a compact research terminal:
 
-- Subscribe to specific companies
-- Multi-channel notifications (push, email, in-app)
-- Custom alert triggers: new filings, price movements, news
-- Real-time updates on watched companies
+- live price and % change
+- market cap, EV, P/E, and key ratios
+- multi-year income statement / balance sheet / cash flow
+- charts for price, revenue, margins, EPS, and FCF
+- latest filings, press, and transcripts
+- AI summaries of important changes
+- peer comparison and alerts
+
+### 4. AI Copilot for Source-Grounded Analysis
+
+Aperture uses AI to help users move faster, but keeps analysis grounded in actual documents and data.
+
+AI features include:
+
+- filing summaries
+- earnings transcript highlights
+- key risk extraction
+- metric explanations in plain English
+- bull / bear framing
+- change detection between old vs new documents
+- source-cited Q&A over company docs and structured financials
+
+### 5. Watchlists, Alerts, and Research Monitoring
+
+Users can subscribe to companies, documents, and custom conditions.
+
+Alert types include:
+
+- new filing or annual report
+- earnings release / transcript published
+- price or volume movement
+- metric thresholds
+- company-specific updates
+- semantic alerts from filings and press releases
+
+Examples:
+
+- notify me when Tesla mentions “guidance cut”
+- alert me if Apple drops more than 3%
+- tell me when a semiconductor company files a new 10-Q
+- notify me when buyback language changes in a filing
+
+### 6. Unified Structured Financials
+
+Aperture combines market APIs with extracted document intelligence.
+
+Structured views include:
+
+- annual and quarterly financial statements
+- key ratios and derived metrics
+- trend analysis
+- side-by-side company comparison
+- exportable financial tables
+
+### 7. Smart Market Dashboard
+
+The root dashboard is being redesigned to feel less like a news homepage and more like a real terminal.
+
+It focuses on:
+
+- what moved markets today
+- what changed in your watchlist
+- what new filings and documents dropped
+- what upcoming catalysts matter
+- what to investigate next
+
+---
+
+## 🖥 Dashboard Layout
+
+Aperture’s root dashboard is organized as a personalized research workspace.
+
+### Left Sidebar
+
+The top navigation is moved into a persistent sidebar for faster workflow switching.
+
+Sections include:
+
+- **Overview**
+- **Watchlists**
+- **Documents**
+- **Screeners**
+- **Calendar**
+- **Macro**
+- **Movers**
+- **Saved**
+
+Below the navigation, the sidebar can also show:
+
+- recent AI chats
+- pinned research threads
+- saved searches
+- recently viewed companies or documents
+
+This makes Aperture feel more like a working terminal and less like a traditional website.
+
+### Top Bar
+
+The top bar contains:
+
+- universal search / command palette
+- region toggle
+- alerts
+- quick actions
+- user menu
+
+Example search:
+
+> Search stocks, filings, metrics, people, reports, topics...
+
+### Dashboard Modules
+
+The homepage is centered around these modules:
+
+#### Market Pulse
+
+A compact strip for major assets such as:
+
+- S&P 500
+- Nasdaq
+- US 10Y
+- DXY
+- WTI / Brent
+- Gold
+- BTC
+- VIX
+
+#### Today in Your Universe
+
+A personalized high-signal feed showing:
+
+- new filings
+- major price moves
+- parsed transcripts
+- guidance changes
+- watchlist events
+- AI-detected document changes
+
+#### Market Summary
+
+A concise summary of the day’s most relevant macro and market developments.
+
+#### New Documents / Filings
+
+A feed of:
+
+- 10-K / 10-Q / 8-K
+- annual reports
+- transcripts
+- investor presentations
+- press releases
+
+with processing states such as:
+
+- queued
+- OCR complete
+- parsed
+- summarized
+- diff available
+
+#### Watchlist
+
+A compact list of followed companies with:
+
+- live price
+- % change
+- badges for filings / earnings / alerts
+- quick access to research pages
+
+#### Upcoming Catalysts
+
+A calendar-style panel for:
+
+- earnings
+- ex-dividend dates
+- annual meetings
+- macro releases
+- watchlist events
+
+#### Alert Inbox
+
+A dedicated place for actionable updates rather than just generic notifications.
+
+#### Ask Aperture
+
+A persistent AI input for fast questions like:
+
+- compare Apple and Microsoft gross margin over 5 years
+- what changed in NVIDIA’s latest 8-K
+- summarize the latest TSM transcript
+- show 2024 filings mentioning tariffs
+
+---
+
+## 🧠 Product Direction
+
+Aperture is not trying to replicate every Bloomberg feature.
+
+The product is focused on a narrower but highly valuable set of workflows:
+
+- public company research
+- filings and earnings intelligence
+- financial statement analysis
+- market monitoring
+- alerts and investigation
+
+### Near-term MVP priorities
+
+- universal finance search
+- company pages with structured financials
+- markdown document reader
+- source-grounded AI chat
+- watchlists
+- alerts
+- market dashboard
+- upcoming catalysts
+- peer comparison
+
+### Next features
+
+- filing diff / change detection
+- advanced screener
+- semantic document alerts
+- saved research views
+- annotation and collaboration
+- portfolio and holdings workspace
+
+---
+
+## 🔌 Data & Intelligence Stack
+
+Aperture combines multiple APIs and AI tools into one research workflow.
+
+### Market Data
+
+- **Finnhub** — quotes, price changes, market updates, calendar data
+- **Yahoo Finance / yfinance** — backup market data and basic metrics
+- **FMP (Financial Modeling Prep)** — structured financial statements and company fundamentals
+
+### Discovery & Scraping
+
+- **Exa** — search and source discovery
+- **Firecrawl** — crawling, mapping, scraping, and source retrieval
+
+### Document Intelligence
+
+- **Mistral OCR** — PDF text extraction
+- **Mistral LLMs** — summarization, extraction, tagging, change detection, chat
+
+### App Infrastructure
+
+- **Next.js** — frontend app
+- **Bun** — runtime and package manager
+- **Convex** — backend, database, realtime queries, cron jobs, auth
 
 ---
 
@@ -79,26 +329,33 @@ Bloomberg Terminal costs $24,000/year. Most investors don't need all its feature
 
 ### Frontend
 
-- **Framework**: Next.js (App Router) + React + TypeScript
+- **Framework**: Next.js (App Router)
+- **Language**: TypeScript
 - **Runtime**: Bun
-- **UI Components**: Shadcn/ui + Tailwind CSS
+- **Styling**: Tailwind CSS
+- **UI Components**: Shadcn/ui
 
 ### Backend
 
-- **Database & Backend**: Convex (serverless functions, real-time DB, cron jobs)
+- **Backend + Database**: Convex
 - **Authentication**: Convex Auth
-- **Search**: Convex full-text search + Exa (semantic search)
+- **Realtime**: Convex subscriptions / queries
+- **Jobs / Scheduling**: Convex cron jobs
 
-### AI & Data Processing
+### AI / Search / Extraction
 
-- **LLM**: Mistral AI (chat, embeddings, OCR)
-- **Web Scraping**: Firecrawl
-- **Data Sources**: SEC EDGAR API, company IR pages, financial data APIs
+- **LLM / OCR**: Mistral AI
+- **Semantic / web search**: Exa
+- **Scraping / crawling**: Firecrawl
 
-### Additional Services
+### Notifications
 
-- **Notifications**: Web Push API + Resend/SendGrid
-- **Deployment**: Vercel (frontend) + Convex (backend)
+- **Push / Email / In-app**: Web Push API + Resend or SendGrid
+
+### Deployment
+
+- **Frontend**: Vercel
+- **Backend**: Convex
 
 ---
 
@@ -106,9 +363,11 @@ Bloomberg Terminal costs $24,000/year. Most investors don't need all its feature
 
 ### Prerequisites
 
-- [Bun](https://bun.sh/) installed
-- [Convex account](https://convex.dev/) (free tier available)
-- API keys for: Mistral AI, Exa, Firecrawl
+Make sure you have:
+
+- [Bun](https://bun.sh/)
+- a [Convex account](https://convex.dev/)
+- API keys for the services you want to enable
 
 ### Installation
 
@@ -131,162 +390,203 @@ Bloomberg Terminal costs $24,000/year. Most investors don't need all its feature
    cp .env.example .env.local
    ```
 
-   Add your API keys:
+4. **Add your environment variables**
 
    ```env
    CONVEX_DEPLOYMENT=<your-convex-deployment>
    MISTRAL_API_KEY=<your-mistral-key>
    EXA_API_KEY=<your-exa-key>
    FIRECRAWL_API_KEY=<your-firecrawl-key>
+   FMP_API_KEY=<your-fmp-key>
+   FINNHUB_API_KEY=<your-finnhub-key>
    ```
 
-   For live market news, earnings, and filings on the dashboard, set **FINNHUB_API_KEY** in the [Convex dashboard](https://dashboard.convex.dev) (Settings → Environment Variables). Get a free key at [finnhub.io](https://finnhub.io). Stock and ETF quotes use [stockprices.dev](https://stockprices.dev) and require no key.
+   Notes:
+   - `FINNHUB_API_KEY` can also be set in the [Convex dashboard](https://dashboard.convex.dev)
+   - Yahoo-based routes may not require an API key depending on implementation
+   - Some quote routes may use fallback providers
 
-4. **Initialize Convex Auth**
+5. **Initialize Convex Auth**
 
    ```bash
    npx @convex-dev/auth
    ```
 
-5. **Run development server**
+6. **Run the development server**
 
    ```bash
    bun run dev
    ```
 
-6. **Open your browser**
-   Navigate to [http://localhost:3000](http://localhost:3000)
+7. **Open the app**
+
+   Visit: [http://localhost:3000](http://localhost:3000)
 
 ---
 
 ## 📂 Project Structure
 
-```
+```text
 aperture/
-├── app/                    # Next.js app directory
-│   ├── (auth)/            # Authentication pages
-│   ├── dashboard/         # Main dashboard
-│   ├── company/[id]/      # Company detail pages
-│   └── search/            # Search interface
-   └── 📁api
-      └── 📁chat
-         ├── route.ts
-      └── 📁exa
-         └── 📁scrape
-               └── 📁batch
-                  ├── route.ts
-               └── 📁subpages
-                  ├── route.ts
-               ├── route.ts
-         └── 📁search
-               ├── route.ts
-         └── 📁search-and-contents
-               ├── route.ts
-      └── 📁finnhub
-         └── 📁[ticker]
-               ├── route.ts
-      └── 📁firecrawl
-         └── 📁agent
-               ├── route.ts
-               ├── types.ts
-         └── 📁crawl
-               ├── route.ts
-               ├── types.ts
-         └── 📁map
-               ├── route.ts
-               ├── types.ts
-         └── 📁scrape
-               ├── route.ts
-               ├── types.ts
-         └── 📁search
-               ├── route.ts
-               ├── types.ts
-         ├── firecrawlClient.ts
-      └── 📁fmp
-         └── 📁[ticker]
-               ├── route.ts
-      └── 📁ocr
-         ├── route.ts
-      └── 📁yahoo
-         └── 📁[ticker]
-               └── route.ts
-├── convex/                # Convex backend
-│   ├── schema.ts          # Database schema
-│   ├── companies.ts       # Company queries/mutations
-│   ├── financials.ts      # Financial data functions
-│   ├── news.ts            # News scraping & categorization
-│   ├── search.ts          # Search functions
-│   ├── subscriptions.ts   # Alert subscriptions
-│   └── crons.ts           # Scheduled jobs
-├── components/            # React components
-│   ├── ui/               # Shadcn UI components
-│   ├── charts/           # Financial charts
-│   └── dashboard/        # Dashboard components
-├── lib/                   # Utilities
-└── public/               # Static assets
+├── app/
+│   ├── (auth)/                 # Authentication pages
+│   ├── dashboard/              # Root dashboard / terminal view
+│   ├── company/[id]/           # Company research workspace
+│   ├── search/                 # Search results and query views
+│   └── api/
+│       ├── chat/
+│       │   └── route.ts
+│       ├── exa/
+│       │   ├── search/route.ts
+│       │   ├── search-and-contents/route.ts
+│       │   └── scrape/
+│       │       ├── route.ts
+│       │       ├── batch/route.ts
+│       │       └── subpages/route.ts
+│       ├── firecrawl/
+│       │   ├── agent/route.ts
+│       │   ├── crawl/route.ts
+│       │   ├── map/route.ts
+│       │   ├── scrape/route.ts
+│       │   ├── search/route.ts
+│       │   ├── firecrawlClient.ts
+│       │   └── types.ts
+│       ├── finnhub/
+│       │   └── [ticker]/route.ts
+│       ├── fmp/
+│       │   └── [ticker]/route.ts
+│       ├── ocr/
+│       │   └── route.ts
+│       └── yahoo/
+│           └── [ticker]/route.ts
+├── convex/
+│   ├── schema.ts               # Database schema
+│   ├── companies.ts            # Company queries and mutations
+│   ├── financials.ts           # Structured financial data
+│   ├── documents.ts            # Parsed filings / reports
+│   ├── news.ts                 # News ingestion and categorization
+│   ├── search.ts               # Search functions
+│   ├── subscriptions.ts        # Alerts and subscriptions
+│   └── crons.ts                # Scheduled jobs
+├── components/
+│   ├── ui/                     # Shared UI components
+│   ├── dashboard/              # Dashboard widgets
+│   ├── charts/                 # Market / financial charts
+│   ├── documents/              # Document reader components
+│   └── chat/                   # AI chat components
+├── lib/                        # Utilities, helpers, clients
+├── public/                     # Static assets
+└── docs/                       # Project docs
 ```
+
+---
+
+## 🔍 Example Use Cases
+
+Aperture is meant to support workflows like:
+
+- reading a company’s 10-K in clean markdown
+- asking AI to extract key risks and cite the exact section
+- comparing revenue growth, margin expansion, and valuation across peers
+- monitoring a watchlist for new filings and earnings
+- seeing what changed between the latest and previous report
+- searching for thematic signals across many companies
+
+Example prompts:
+
+- `Summarize the key risks in Adobe's latest annual report`
+- `Compare Apple, Microsoft, and Google operating margins over 5 years`
+- `Show the most recent semiconductor earnings transcripts`
+- `What changed in Tesla's risk factors this quarter?`
+- `Find companies mentioning restructuring in the last 30 days`
+
+---
+
+## 🗺 Roadmap
+
+### In Progress
+
+- dashboard redesign with left sidebar + recent chats
+- document reader and company chat workflow
+- structured financial statement views
+- market pulse and watchlist monitoring
+
+### Planned
+
+- filing diff and redline comparison
+- semantic alerts
+- saved research workspaces
+- advanced screener
+- peer comps table
+- analyst-style event summaries
+- collaboration and annotations
 
 ---
 
 ## 🎓 Academic Context
 
-This project was built for the **ECON3086 Python Programming for FinTech** Course with the following learning objectives:
+This project was built in the context of the **ECON3086 Python Programming for FinTech** course.
 
-### Evaluation Criteria
+### Learning goals demonstrated
 
-- **Practical Application (20%)**: Solving the problem of expensive financial data access
-- **Basic Programming (30%)**: Complex data pipelines, TypeScript, error handling, clean React architecture
-- **Library Usage (40%)**: Advanced integration of AI APIs, web scraping, real-time databases, charting libraries
-- **Presentation (10%)**: Live demonstration of search, AI insights, and real-time alerts
-
-### Key Learning Outcomes
-
-- Building production-grade full-stack applications
-- Integrating multiple third-party APIs and AI services
-- Implementing real-time data synchronization
-- Web scraping and data extraction techniques
-- Financial data analysis and visualization
-- User authentication and authorization
-- Responsive UI/UX design
+- full-stack application design
+- API integration across multiple providers
+- financial data processing and visualization
+- web scraping and document extraction
+- AI-assisted search and summarization
+- realtime backend workflows
+- user authentication and notifications
 
 ---
 
 ## 📚 Documentation
 
-### Key Features Documentation
+Planned or existing docs may include:
 
-- **[Search Engine](docs/search.md)**: How semantic search and PDF extraction works
-- **[AI Insights](docs/ai-insights.md)**: LLM-powered financial analysis
-- **[Data Pipeline](docs/data-pipeline.md)**: Scraping, processing, and storing financial data
-- **[Alerts System](docs/alerts.md)**: Subscription and notification architecture
+- `docs/search.md` — semantic and document search
+- `docs/data-pipeline.md` — scraping, OCR, extraction, indexing
+- `docs/ai-insights.md` — source-grounded analysis
+- `docs/alerts.md` — subscriptions and notification flow
+- `docs/dashboard.md` — homepage information architecture
+- `docs/company-page.md` — company workspace design
 
-### Development Guides
+---
 
-- [Adding New Data Sources](docs/add-data-source.md)
-- [Creating Custom Metrics](docs/custom-metrics.md)
-- [Extending AI Capabilities](docs/extend-ai.md)
+## ⚠️ Notes
+
+Aperture is an educational and product prototyping project.
+
+Depending on deployment and commercial usage, some data providers may require:
+
+- production API plans
+- redistribution rights
+- commercial licensing compliance
+
+Always verify the terms of any market data, news, or scraped content source used in production.
 
 ---
 
 ## 📄 License
 
-MIT License - see [LICENSE](LICENSE) file for details
+MIT License — see [LICENSE](LICENSE).
 
 ---
 
 ## 🙏 Acknowledgments
 
-- **Bloomberg L.P.** for inspiration on what professional financial terminals can do
-- **Convex** for the amazing real-time backend platform
-- **Mistral AI** for powerful and affordable AI capabilities
-- Our course instructor and peers for feedback and support
+- **Bloomberg** for inspiring what a great research terminal can feel like
+- **Convex** for realtime backend infrastructure
+- **Mistral AI** for OCR and language models
+- **Exa** for semantic discovery
+- **Firecrawl** for web crawling and scraping
+- instructors, peers, and early testers for feedback
 
 ---
 
 <div align="center">
 
-**Built with ❤️ using Convex, Next.js, and AI**
+**Built with Bun, Next.js, and Convex**
 
-_Making financial intelligence accessible to everyone_
+_A modern financial research terminal for everyone_
 
 </div>
