@@ -11,10 +11,12 @@
 import type * as CustomPassword from "../CustomPassword.js";
 import type * as auth from "../auth.js";
 import type * as companies from "../companies.js";
+import type * as discoverDocuments from "../discoverDocuments.js";
 import type * as documents from "../documents.js";
 import type * as http from "../http.js";
 import type * as market from "../market.js";
 import type * as marketTransform from "../marketTransform.js";
+import type * as processDocuments from "../processDocuments.js";
 import type * as users from "../users.js";
 
 import type {
@@ -27,10 +29,12 @@ declare const fullApi: ApiFromModules<{
   CustomPassword: typeof CustomPassword;
   auth: typeof auth;
   companies: typeof companies;
+  discoverDocuments: typeof discoverDocuments;
   documents: typeof documents;
   http: typeof http;
   market: typeof market;
   marketTransform: typeof marketTransform;
+  processDocuments: typeof processDocuments;
   users: typeof users;
 }>;
 
