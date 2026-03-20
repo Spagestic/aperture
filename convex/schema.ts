@@ -19,4 +19,28 @@ export default defineSchema({
   })
     .index("email", ["email"])
     .index("phone", ["phone"]),
+
+  companies: defineTable({
+    ticker: v.string(),
+    name: v.string(),
+    exchange: v.string(),
+    websiteUrl: v.optional(v.string()), // Kept as general websiteUrl, Firecrawl will explore to find IR pages
+  }).index("by_ticker", ["ticker"]),
+
+  documents: defineTable({
+    companyId: v.id("companies"),
+    type: v.string(),
+    title: v.string(),
+    pdfUrl: v.string(),
+    publishedDate: v.optional(v.string()),
+    markdownContent: v.optional(v.string()),
+    status: v.union(
+      v.literal("pending"),
+      v.literal("processing"),
+      v.literal("completed"),
+      v.literal("failed"),
+    ),
+  })
+    .index("by_company", ["companyId"])
+    .index("by_status", ["status"]),
 });
