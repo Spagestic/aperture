@@ -68,6 +68,26 @@ export const listByCompany = query({
   },
 });
 
+export const listByTicker = query({
+  args: { ticker: v.string() },
+  handler: async (ctx, args) => {
+    const company = await ctx.db
+      .query("companies")
+      .withIndex("by_ticker", (q) => q.eq("ticker", args.ticker))
+      .first();
+
+    if (!company) {
+      return [];
+    }
+
+    return await ctx.db
+      .query("documents")
+      .withIndex("by_company", (q) => q.eq("companyId", company._id))
+      .order("desc")
+      .collect();
+  },
+});
+
 export const getPendingDocuments = query({
   args: { limit: v.optional(v.number()) },
   handler: async (ctx, args) => {
