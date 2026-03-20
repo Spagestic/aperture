@@ -43,10 +43,7 @@ export default function CompanyLayout(props: CompanyLayoutProps) {
   );
 }
 
-async function CompanyLayoutContent({
-  children,
-  params,
-}: CompanyLayoutProps) {
+async function CompanyLayoutContent({ children, params }: CompanyLayoutProps) {
   const { id } = await params;
   const ticker = id.length <= 5 ? id.toUpperCase() : id;
 
@@ -61,6 +58,7 @@ async function CompanyLayoutContent({
     { value: "holders", label: "Holders" },
     { value: "historical-data", label: "Historical Data" },
     { value: "analysis", label: "Analysis" },
+    { value: "documents", label: "Documents" },
   ];
   return (
     <div className="@container/main flex flex-1 flex-col px-4 pb-40 pt-4 md:px-6 md:pb-44 md:pt-6">
