@@ -29,7 +29,13 @@ export default defineSchema({
 
   documents: defineTable({
     companyId: v.id("companies"),
-    type: v.string(),
+    type: v.union(
+      v.literal("Annual Report"),
+      v.literal("Interim Report"),
+      v.literal("Announcement"),
+      v.literal("Press Release"),
+      v.literal("Other"),
+    ),
     title: v.string(),
     pdfUrl: v.string(),
     publishedDate: v.optional(v.string()),

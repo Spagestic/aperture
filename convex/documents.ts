@@ -4,7 +4,13 @@ import { mutation, query } from "./_generated/server";
 export const create = mutation({
   args: {
     companyId: v.id("companies"),
-    type: v.string(),
+    type: v.union(
+      v.literal("Annual Report"),
+      v.literal("Interim Report"),
+      v.literal("Announcement"),
+      v.literal("Press Release"),
+      v.literal("Other"),
+    ),
     title: v.string(),
     pdfUrl: v.string(),
     publishedDate: v.optional(v.string()),
@@ -27,10 +33,28 @@ export const updateStatus = mutation({
       v.literal("failed"),
     ),
     markdownContent: v.optional(v.string()),
+    title: v.optional(v.string()),
+    type: v.optional(
+      v.union(
+        v.literal("Annual Report"),
+        v.literal("Interim Report"),
+        v.literal("Announcement"),
+        v.literal("Press Release"),
+        v.literal("Other"),
+      ),
+    ),
+    publishedDate: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const { documentId, ...updates } = args;
     await ctx.db.patch(documentId, updates);
+  },
+});
+
+export const getDocument = query({
+  args: { documentId: v.id("documents") },
+  handler: async (ctx, args) => {
+    return await ctx.db.get(args.documentId);
   },
 });
 
