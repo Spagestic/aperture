@@ -3,7 +3,6 @@ import Link from "next/link";
 import { Star } from "lucide-react";
 
 import { ReactNode, Suspense } from "react";
-import { CompanyLogo } from "@/components/CompanyLogo";
 import { Button } from "@/components/ui/button";
 import { getDemoCompanyFinancialPayload } from "@/lib/financial-dashboard";
 import { fetchCompanyFinancials } from "@/lib/company-financials-api";
@@ -65,10 +64,6 @@ async function CompanyLayoutContent({ children, params }: CompanyLayoutProps) {
       {/* Top Header */}
       <div className="mb-4 flex flex-col gap-3 border-b border-border/60 pb-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="flex items-start gap-3">
-          <CompanyLogo
-            domain={profile.logoDomain ?? profile.slug}
-            className="h-14 w-14 rounded-md border border-border/50 bg-background object-cover"
-          />
           <div className="space-y-1">
             <h1 className="text-3xl font-semibold tracking-tight">
               {profile.name}

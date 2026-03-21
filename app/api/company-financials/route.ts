@@ -4,7 +4,7 @@ import { fetchCompanyFinancials } from "@/lib/company-financials-api";
 import { getDemoCompanyFinancialPayload } from "@/lib/financial-dashboard";
 
 export async function GET(request: NextRequest) {
-  const company = request.nextUrl.searchParams.get("company") ?? "nvda";
+  const company = request.nextUrl.searchParams.get("company") ?? "0700.HK";
   const apiKey = process.env.ALPHA_VANTAGE_API_KEY;
 
   if (!apiKey) {

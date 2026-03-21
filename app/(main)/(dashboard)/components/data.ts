@@ -102,77 +102,77 @@ export const marketSummary: SummaryItem[] = [
 
 export const watchlist: WatchlistItem[] = [
   {
-    company: "Microsoft",
-    ticker: "MSFT",
-    price: "$408.96",
-    change: "-0.42%",
-    tone: "down",
-  },
-  {
-    company: "Apple",
-    ticker: "AAPL",
-    price: "$257.46",
-    change: "-1.09%",
-    tone: "down",
-  },
-  {
-    company: "NVIDIA",
-    ticker: "NVDA",
-    price: "$177.82",
-    change: "-3.01%",
-    tone: "down",
-  },
-  {
-    company: "Amazon",
-    ticker: "AMZN",
-    price: "$213.21",
-    change: "-2.62%",
-    tone: "down",
-  },
-  {
-    company: "Tencent",
+    company: "Tencent Holdings",
     ticker: "0700.HK",
-    price: "HK$378.20",
+    price: "HK$412.80",
     change: "+1.22%",
     tone: "up",
+  },
+  {
+    company: "Alibaba Group",
+    ticker: "9988.HK",
+    price: "HK$88.50",
+    change: "-0.45%",
+    tone: "down",
+  },
+  {
+    company: "Meituan",
+    ticker: "3690.HK",
+    price: "HK$116.20",
+    change: "+2.10%",
+    tone: "up",
+  },
+  {
+    company: "China Mobile",
+    ticker: "0941.HK",
+    price: "HK$76.30",
+    change: "+0.30%",
+    tone: "up",
+  },
+  {
+    company: "HSBC Holdings",
+    ticker: "0005.HK",
+    price: "HK$68.90",
+    change: "-1.10%",
+    tone: "down",
   },
 ];
 
 export const upcomingEvents: UpcomingEvent[] = [
   {
     day: "Tue",
-    title: "NVDA earnings call",
+    title: "1299.HK earnings call",
     meta: "After market close",
   },
   {
     day: "Wed",
-    title: "AAPL annual meeting",
-    meta: "10:00 AM EST",
+    title: "0700.HK annual meeting",
+    meta: "10:00 AM HKT",
   },
   {
     day: "Fri",
-    title: "TSM ex-dividend date",
+    title: "0005.HK ex-dividend date",
     meta: "Cash dividend",
   },
 ];
 
 export const latestFilings: FilingItem[] = [
   {
-    company: "Apple",
-    ticker: "AAPL",
-    type: "10-K",
+    company: "Tencent Holdings",
+    ticker: "0700.HK",
+    type: "FY2025 Annual Report",
     time: "14 minutes ago",
   },
   {
-    company: "NVIDIA",
-    ticker: "NVDA",
-    type: "8-K",
+    company: "Alibaba Group",
+    ticker: "9988.HK",
+    type: "Interim Report",
     time: "37 minutes ago",
   },
   {
-    company: "Tencent",
-    ticker: "0700.HK",
-    type: "HKEX filing",
+    company: "Meituan",
+    ticker: "3690.HK",
+    type: "Announcement",
     time: "2 hours ago",
   },
 ];

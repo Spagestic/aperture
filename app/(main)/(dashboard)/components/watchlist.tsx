@@ -9,31 +9,28 @@ type WatchlistSectionProps = {
   watchlist: WatchlistItem[];
 };
 
-function companySlugFromTicker(ticker: string) {
-  return ticker.toLowerCase().replace(/\./g, "-");
-}
-
 function WatchlistRow({ item }: { item: WatchlistItem }) {
   return (
     <Link
-      href={`/company/${companySlugFromTicker(item.ticker)}`}
+      href={`/company/${item.ticker}`}
       className="flex items-center justify-between px-4 py-3 transition-colors hover:bg-muted"
     >
       <div className="flex min-w-0 items-center gap-3">
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#2a2a2a]">
-          {/* <img
+        {/* <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#2a2a2a]">
+           <img
             src={`https://logo.clearbit.com/${item.domain}`}
             alt={`${item.company} logo`}
             className="h-full w-full object-cover"
-          /> */}
-        </div>
+          /> 
+        </div>*/}
 
         <div className="min-w-0">
           <div className="truncate text-sm font-medium leading-tight text-white">
             {item.company}
           </div>
           <div className="mt-0.5 text-xs font-medium uppercase tracking-wide text-[#9ca3af]">
-            {item.ticker} · NASDAQ
+            {item.ticker}
+            {/* · HKEX */}
           </div>
         </div>
       </div>
