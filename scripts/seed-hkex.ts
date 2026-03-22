@@ -14,6 +14,180 @@ if (!CONVEX_URL) {
 
 const client = new ConvexHttpClient(CONVEX_URL);
 
+/** Optional display metadata for the companies table */
+const COMPANY_META: Record<
+  string,
+  {
+    sector: string;
+    country: string;
+    industry?: string;
+    currency: string;
+    listedBoard: string;
+    description?: string;
+  }
+> = {
+  "0700.HK": {
+    sector: "Technology",
+    country: "China",
+    industry: "Internet & software",
+    currency: "HKD",
+    listedBoard: "Main Board",
+    description: "Internet platforms, gaming, fintech, and cloud in China.",
+  },
+  "9988.HK": {
+    sector: "Consumer Discretionary",
+    country: "China",
+    industry: "E-commerce & retail",
+    currency: "HKD",
+    listedBoard: "Main Board",
+    description: "E-commerce, cloud, digital media, and local services.",
+  },
+  "3690.HK": {
+    sector: "Consumer Discretionary",
+    country: "China",
+    industry: "Internet services",
+    currency: "HKD",
+    listedBoard: "Main Board",
+    description: "Local services, in-store retail, and food delivery.",
+  },
+  "0941.HK": {
+    sector: "Communication Services",
+    country: "China",
+    industry: "Telecom",
+    currency: "HKD",
+    listedBoard: "Main Board",
+    description: "Mobile telecommunications operator in Mainland China and Hong Kong.",
+  },
+  "0005.HK": {
+    sector: "Financials",
+    country: "United Kingdom",
+    industry: "Diversified banks",
+    currency: "HKD",
+    listedBoard: "Main Board",
+    description: "Global banking and wealth management with HK listing.",
+  },
+  "1299.HK": {
+    sector: "Financials",
+    country: "Hong Kong",
+    industry: "Life insurance",
+    currency: "HKD",
+    listedBoard: "Main Board",
+    description: "Pan-Asian life insurance and asset management.",
+  },
+  "0883.HK": {
+    sector: "Energy",
+    country: "China",
+    industry: "Oil & gas",
+    currency: "HKD",
+    listedBoard: "Main Board",
+    description: "Upstream oil and gas exploration and production.",
+  },
+  "0388.HK": {
+    sector: "Financials",
+    country: "Hong Kong",
+    industry: "Exchange & clearing",
+    currency: "HKD",
+    listedBoard: "Main Board",
+    description: "Hong Kong securities and derivatives exchange operator.",
+  },
+  "0001.HK": {
+    sector: "Conglomerates",
+    country: "Hong Kong",
+    industry: "Multi-sector holdings",
+    currency: "HKD",
+    listedBoard: "Main Board",
+    description: "Ports, retail, infrastructure, and telecommunications.",
+  },
+  "0823.HK": {
+    sector: "Real Estate",
+    country: "Hong Kong",
+    industry: "REIT",
+    currency: "HKD",
+    listedBoard: "Main Board",
+    description: "Hong Kong retail and commercial property REIT.",
+  },
+  "2318.HK": {
+    sector: "Financials",
+    country: "China",
+    industry: "Insurance",
+    currency: "HKD",
+    listedBoard: "Main Board",
+    description: "Integrated financial services and insurance in China.",
+  },
+  "1211.HK": {
+    sector: "Consumer Discretionary",
+    country: "China",
+    industry: "Automobiles",
+    currency: "HKD",
+    listedBoard: "Main Board",
+    description: "EV and auto manufacturing with global footprint.",
+  },
+  "0016.HK": {
+    sector: "Real Estate",
+    country: "Hong Kong",
+    industry: "Property development",
+    currency: "HKD",
+    listedBoard: "Main Board",
+    description: "Hong Kong property development and investment.",
+  },
+  "0002.HK": {
+    sector: "Utilities",
+    country: "Hong Kong",
+    industry: "Electric utility",
+    currency: "HKD",
+    listedBoard: "Main Board",
+    description: "Electricity generation and supply in Hong Kong.",
+  },
+  "0003.HK": {
+    sector: "Utilities",
+    country: "Hong Kong",
+    industry: "Gas utility",
+    currency: "HKD",
+    listedBoard: "Main Board",
+    description: "Town gas production and distribution in Hong Kong.",
+  },
+  "0011.HK": {
+    sector: "Financials",
+    country: "Hong Kong",
+    industry: "Banks",
+    currency: "HKD",
+    listedBoard: "Main Board",
+    description: "Retail and commercial banking in Hong Kong and Greater Bay Area.",
+  },
+  "0066.HK": {
+    sector: "Industrials",
+    country: "Hong Kong",
+    industry: "Rail transport",
+    currency: "HKD",
+    listedBoard: "Main Board",
+    description: "Hong Kong rail network and related property development.",
+  },
+  "1093.HK": {
+    sector: "Health Care",
+    country: "China",
+    industry: "Pharmaceuticals",
+    currency: "HKD",
+    listedBoard: "Main Board",
+    description: "Innovation-focused pharmaceutical group in China.",
+  },
+  "0267.HK": {
+    sector: "Financials",
+    country: "China",
+    industry: "Conglomerate",
+    currency: "HKD",
+    listedBoard: "Main Board",
+    description: "Financial services, industrials, and resources in China.",
+  },
+  "0175.HK": {
+    sector: "Consumer Discretionary",
+    country: "China",
+    industry: "Automobiles",
+    currency: "HKD",
+    listedBoard: "Main Board",
+    description: "Automobile manufacturing and mobility brands.",
+  },
+};
+
 const TOP_HKEX_COMPANIES = [
   {
     ticker: "0700.HK",
@@ -101,6 +275,25 @@ const TOP_HKEX_COMPANIES = [
   },
 ];
 
+function metaToCompanyFields(
+  meta: (typeof COMPANY_META)[string] | undefined,
+): Record<string, string> {
+  if (!meta) {
+    return {};
+  }
+  const entries = {
+    country: meta.country,
+    sector: meta.sector,
+    industry: meta.industry,
+    currency: meta.currency,
+    listedBoard: meta.listedBoard,
+    description: meta.description,
+  };
+  return Object.fromEntries(
+    Object.entries(entries).filter(([, v]) => v !== undefined),
+  ) as Record<string, string>;
+}
+
 async function main() {
   console.log(
     `Seeding ${TOP_HKEX_COMPANIES.length} top HKEX companies to Convex...`,
@@ -114,13 +307,31 @@ async function main() {
     );
 
     try {
-      await client.mutation(api.companies.create, {
+      const meta = COMPANY_META[company.ticker];
+      const extra = metaToCompanyFields(meta);
+
+      const existing = await client.query(api.companies.getByTicker, {
         ticker: company.ticker,
-        name: company.name,
-        exchange: "HKEX",
-        websiteUrl: company.websiteUrl,
       });
-      console.log(`✅ Saved ${company.ticker} to Convex`);
+
+      if (existing) {
+        if (Object.keys(extra).length > 0) {
+          await client.mutation(api.companies.patch, {
+            companyId: existing._id,
+            ...extra,
+          });
+        }
+        console.log(`✅ Updated ${company.ticker} in Convex`);
+      } else {
+        await client.mutation(api.companies.create, {
+          ticker: company.ticker,
+          name: company.name,
+          exchange: "HKEX",
+          websiteUrl: company.websiteUrl,
+          ...extra,
+        });
+        console.log(`✅ Created ${company.ticker} in Convex`);
+      }
     } catch (error) {
       console.error(`❌ Failed to save ${company.ticker}:`, error);
     }

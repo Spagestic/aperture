@@ -1,4 +1,5 @@
 import { v } from "convex/values";
+import { internal } from "./_generated/api";
 import { mutation, query } from "./_generated/server";
 
 export const create = mutation({
@@ -16,10 +17,14 @@ export const create = mutation({
     publishedDate: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    return await ctx.db.insert("documents", {
+    const id = await ctx.db.insert("documents", {
       ...args,
       status: "pending",
     });
+    await ctx.runMutation(internal.companies.refreshLatestFilingDate, {
+      companyId: args.companyId,
+    });
+    return id;
   },
 });
 
@@ -48,6 +53,12 @@ export const updateStatus = mutation({
   handler: async (ctx, args) => {
     const { documentId, ...updates } = args;
     await ctx.db.patch(documentId, updates);
+    const doc = await ctx.db.get(documentId);
+    if (doc) {
+      await ctx.runMutation(internal.companies.refreshLatestFilingDate, {
+        companyId: doc.companyId,
+      });
+    }
   },
 });
 

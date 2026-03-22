@@ -222,6 +222,20 @@ async function fetchMarketStripItem(
  * This returns quote details, profile names, and the raw financial statement
  * history needed by downstream dashboard pages.
  */
+/**
+ * Lightweight quote only — use for tables and lists (no fundamentals fetch).
+ */
+export async function getYahooQuoteLite(ticker: string): Promise<YahooQuote> {
+  const normalizedTicker = ticker.trim().toUpperCase();
+
+  if (!normalizedTicker) {
+    throw new Error("Ticker is required");
+  }
+
+  const quote = (await yahooFinance.quote(normalizedTicker)) as Quote;
+  return normalizeQuote(quote);
+}
+
 export async function getYahooCompanyData(
   ticker: string,
 ): Promise<CompanyData> {

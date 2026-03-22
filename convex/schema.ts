@@ -24,7 +24,21 @@ export default defineSchema({
     ticker: v.string(),
     name: v.string(),
     exchange: v.string(),
-    websiteUrl: v.optional(v.string()), // Kept as general websiteUrl, Firecrawl will explore to find IR pages
+    websiteUrl: v.optional(v.string()),
+    /** Latest document published date for this company (YYYY-MM-DD), denormalized from documents */
+    latestFilingDate: v.optional(v.string()),
+    /** Country of headquarters or primary listing jurisdiction */
+    country: v.optional(v.string()),
+    /** Broad sector label, e.g. Technology, Financials */
+    sector: v.optional(v.string()),
+    /** Narrower industry within sector */
+    industry: v.optional(v.string()),
+    /** Trading / reporting currency when relevant, e.g. HKD */
+    currency: v.optional(v.string()),
+    /** HK Main Board vs GEM, or free text */
+    listedBoard: v.optional(v.string()),
+    /** Short one-line description for UI */
+    description: v.optional(v.string()),
   }).index("by_ticker", ["ticker"]),
 
   documents: defineTable({
