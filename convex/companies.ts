@@ -14,6 +14,11 @@ export const create = mutation({
     currency: v.optional(v.string()),
     listedBoard: v.optional(v.string()),
     description: v.optional(v.string()),
+    category: v.optional(v.string()),
+    subCategory: v.optional(v.string()),
+    boardLot: v.optional(v.string()),
+    isin: v.optional(v.string()),
+    rmbCounter: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     // Check if company already exists
@@ -40,6 +45,11 @@ export const patch = mutation({
     currency: v.optional(v.string()),
     listedBoard: v.optional(v.string()),
     description: v.optional(v.string()),
+    category: v.optional(v.string()),
+    subCategory: v.optional(v.string()),
+    boardLot: v.optional(v.string()),
+    isin: v.optional(v.string()),
+    rmbCounter: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const { companyId, ...u } = args;
@@ -53,6 +63,11 @@ export const patch = mutation({
         | "currency"
         | "listedBoard"
         | "description"
+        | "category"
+        | "subCategory"
+        | "boardLot"
+        | "isin"
+        | "rmbCounter"
       >
     > = {};
     if (u.websiteUrl !== undefined) updates.websiteUrl = u.websiteUrl;
@@ -62,6 +77,11 @@ export const patch = mutation({
     if (u.currency !== undefined) updates.currency = u.currency;
     if (u.listedBoard !== undefined) updates.listedBoard = u.listedBoard;
     if (u.description !== undefined) updates.description = u.description;
+    if (u.category !== undefined) updates.category = u.category;
+    if (u.subCategory !== undefined) updates.subCategory = u.subCategory;
+    if (u.boardLot !== undefined) updates.boardLot = u.boardLot;
+    if (u.isin !== undefined) updates.isin = u.isin;
+    if (u.rmbCounter !== undefined) updates.rmbCounter = u.rmbCounter;
     if (Object.keys(updates).length === 0) {
       return;
     }

@@ -39,6 +39,11 @@ export default defineSchema({
     listedBoard: v.optional(v.string()),
     /** Short one-line description for UI */
     description: v.optional(v.string()),
+    category: v.optional(v.string()),
+    subCategory: v.optional(v.string()),
+    boardLot: v.optional(v.string()),
+    isin: v.optional(v.string()),
+    rmbCounter: v.optional(v.string()),
   }).index("by_ticker", ["ticker"]),
 
   documents: defineTable({
