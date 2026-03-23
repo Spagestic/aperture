@@ -1,6 +1,115 @@
 import { action } from "./_generated/server";
 import { v } from "convex/values";
 import { api } from "./_generated/api";
+import { getFirecrawlClient } from "./firecrawl/client";
+
+type DocumentType =
+  | "Annual Report"
+  | "Interim Report"
+  | "Announcement"
+  | "Press Release"
+  | "Other";
+
+type CrawlPage = {
+  metadata?: {
+    title?: string;
+  };
+  links?: string[];
+};
+
+const GENERIC_TITLE_PATTERNS = [
+  /^document from /i,
+  /^untitled/i,
+  /^index$/i,
+  /^[a-f0-9]{16,}\.pdf$/i,
+];
+
+function normalizeUrl(url: string): string {
+  return url.trim().toLowerCase();
+}
+
+function isLikelyPdf(url: string): boolean {
+  const lower = url.toLowerCase();
+  return lower.endsWith(".pdf") || lower.includes(".pdf?");
+}
+
+function inferDocumentType(url: string): DocumentType {
+  const lower = url.toLowerCase();
+  if (lower.includes("annual")) return "Annual Report";
+  if (lower.includes("interim")) return "Interim Report";
+  if (lower.includes("press")) return "Press Release";
+  if (lower.includes("announcement")) return "Announcement";
+  return "Other";
+}
+
+function titleFromUrl(url: string): string {
+  try {
+    const pathname = new URL(url).pathname;
+    const rawName = pathname.split("/").pop() || "";
+    const decoded = decodeURIComponent(rawName).replace(/[-_]+/g, " ").trim();
+    return decoded || `Document from ${url}`;
+  } catch {
+    return `Document from ${url}`;
+  }
+}
+
+function isGenericTitle(title: string | undefined): boolean {
+  if (!title) return true;
+  const trimmed = title.trim();
+  if (!trimmed) return true;
+  return GENERIC_TITLE_PATTERNS.some((pattern) => pattern.test(trimmed));
+}
+
+async function buildPdfContextTitleMap(
+  websiteUrl: string,
+): Promise<Map<string, string>> {
+  const firecrawl = getFirecrawlClient();
+  const contextByPdfUrl = new Map<string, string>();
+
+  try {
+    const crawlResult = (await firecrawl.crawl(websiteUrl, {
+      limit: 30,
+      maxDiscoveryDepth: 2,
+      pollInterval: 2,
+      timeout: 180,
+      scrapeOptions: {
+        formats: ["links"],
+        onlyMainContent: true,
+      },
+      includePaths: [
+        ".*investor.*",
+        ".*financial.*",
+        ".*report.*",
+        ".*announcement.*",
+      ],
+    })) as unknown as { data?: unknown[]; success?: boolean };
+
+    if (crawlResult.success === false || !Array.isArray(crawlResult.data)) {
+      return contextByPdfUrl;
+    }
+
+    for (const page of crawlResult.data as CrawlPage[]) {
+      const pageTitle = page.metadata?.title?.trim();
+      if (!pageTitle || isGenericTitle(pageTitle) || !Array.isArray(page.links)) {
+        continue;
+      }
+
+      for (const rawLink of page.links) {
+        if (typeof rawLink !== "string" || !isLikelyPdf(rawLink)) {
+          continue;
+        }
+        const normalized = normalizeUrl(rawLink);
+        if (!contextByPdfUrl.has(normalized)) {
+          contextByPdfUrl.set(normalized, pageTitle);
+        }
+      }
+    }
+  } catch (error) {
+    console.warn("Unable to build contextual PDF title map from crawl:", error);
+  }
+
+  return contextByPdfUrl;
+}
 
 export const mapCompanyDocuments = action({
   args: {
@@ -28,71 +137,55 @@ export const mapCompanyDocuments = action({
       throw new Error(`Company ${company.ticker} has no websiteUrl set.`);
     }
 
-    console.log(
-      `Starting Firecrawl map for ${company.ticker} at ${company.websiteUrl}`,
-    );
+    console.log(`Starting Firecrawl discovery for ${company.ticker} at ${company.websiteUrl}`);
+    const firecrawl = getFirecrawlClient();
 
-    const FIRECRAWL_API_KEY = process.env.FIRECRAWL_API_KEY;
-    if (!FIRECRAWL_API_KEY) {
-      throw new Error(
-        "Missing FIRECRAWL_API_KEY environment variable in Convex.",
-      );
+    const mapResult = (await firecrawl.map(company.websiteUrl, {
+      search:
+        "investor relations, annual report, interim report, announcement, financials, pdf",
+      limit: 150,
+      includeSubdomains: true,
+      timeout: 60000,
+    })) as unknown as { links?: string[]; success?: boolean };
+
+    if (mapResult.success === false) {
+      throw new Error("Failed to map via Firecrawl");
     }
 
-    // Use Firecrawl /v1/map endpoint to intelligently find sub-pages based on a search intent
-    const firecrawlUrl = "https://api.firecrawl.dev/v1/map";
-    const mapResponse = await fetch(firecrawlUrl, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${FIRECRAWL_API_KEY}`,
-      },
-      body: JSON.stringify({
-        url: company.websiteUrl,
-        search:
-          "investor relations, annual report, interim report, announcement, financials",
-        limit: 100, // Keep it fast
-      }),
-    });
-
-    if (!mapResponse.ok) {
-      const err = await mapResponse.text();
-      console.error("Firecrawl API error:", err);
-      throw new Error(`Failed to map via Firecrawl: ${err}`);
-    }
-
-    const output = await mapResponse.json();
-    console.log("Map result:", output);
-
-    const links: string[] = output.links || [];
+    const links: string[] = Array.isArray(mapResult.links) ? mapResult.links : [];
 
     // Filter for PDF links or common report pages
     const pdfLinks = links.filter(
       (link) =>
         link.toLowerCase().endsWith(".pdf") ||
         link.toLowerCase().includes("report") ||
-        link.toLowerCase().includes("announcement"),
+        link.toLowerCase().includes("announcement") ||
+        link.toLowerCase().includes("financial"),
     );
 
-    console.log(`Found ${pdfLinks.length} potential documents/PDFs.`);
+    const uniqueLinks = Array.from(
+      new Map(pdfLinks.map((link) => [normalizeUrl(link), link])).values(),
+    );
+
+    console.log(`Found ${uniqueLinks.length} potential documents/PDFs.`);
+    const contextualTitleMap = await buildPdfContextTitleMap(company.websiteUrl);
 
     // Insert these findings into Convex DB as "pending" documents.
     const addedDocs: string[] = [];
-    for (const link of pdfLinks) {
-      let type:
-        | "Annual Report"
-        | "Interim Report"
-        | "Announcement"
-        | "Press Release"
-        | "Other" = "Announcement";
-      if (link.toLowerCase().includes("annual")) type = "Annual Report";
-      if (link.toLowerCase().includes("interim")) type = "Interim Report";
+    for (const link of uniqueLinks) {
+      const type = inferDocumentType(link);
+      const fallbackTitle = titleFromUrl(link);
+      const contextualTitle = contextualTitleMap.get(normalizeUrl(link));
+      const finalTitle =
+        contextualTitle && !isGenericTitle(contextualTitle)
+          ? contextualTitle
+          : fallbackTitle;
 
       try {
         const newDocId = await ctx.runMutation(api.documents.create, {
           companyId: company._id,
           type: type,
-          title: `Document from ${link.split("/").pop() || link}`,
+          title: finalTitle,
           pdfUrl: link,
           // Placeholder date, to be refined during OCR if needed
           publishedDate: new Date().toISOString(),
@@ -105,10 +198,10 @@ export const mapCompanyDocuments = action({
 
     return {
       success: true,
-      message: `Finished mapping ${company.websiteUrl}. Found ${pdfLinks.length} docs.`,
+      message: `Finished mapping ${company.websiteUrl}. Found ${uniqueLinks.length} docs.`,
       documentsAdded: addedDocs.length,
       linksTried: links.length,
-      discoveredLinks: pdfLinks,
+      discoveredLinks: uniqueLinks,
     };
   },
 });
