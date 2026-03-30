@@ -24,20 +24,20 @@ function UpcomingEventRow({ item }: { item: UpcomingEvent }) {
   return (
     <Link
       href={`/company/${companySlugFromTicker(ticker)}`}
-      className="flex items-center justify-between px-4 py-3 transition-colors hover:bg-muted"
+      className="flex items-center justify-between px-4 py-3 transition-colors hover:bg-muted/60"
     >
       <div className="min-w-0">
-        <p className="truncate text-sm font-medium leading-tight text-white">
+        <p className="truncate text-sm font-medium leading-tight text-foreground">
           {item.title}
         </p>
-        <p className="mt-0.5 text-xs font-medium uppercase tracking-wide text-[#9ca3af]">
+        <p className="mt-0.5 text-xs font-medium uppercase tracking-wide text-muted-foreground">
           {item.meta}
         </p>
       </div>
 
       <Badge
         variant="outline"
-        className="ml-3 shrink-0 rounded-full border-white/10 bg-white/5 text-xs font-medium text-white"
+        className="ml-3 shrink-0 rounded-full text-xs font-medium"
       >
         {item.day}
       </Badge>
@@ -61,7 +61,7 @@ export function UpcomingEventsSection({
         </div>
       </div>
 
-      <Card className="overflow-hidden rounded-lg border border-white/10 bg-[#171717] p-0 shadow-none">
+      <Card className="overflow-hidden rounded-lg p-0 shadow-none">
         <CardContent className="p-0">
           {upcomingEvents.map((item) => (
             <UpcomingEventRow key={`${item.day}-${item.title}`} item={item} />

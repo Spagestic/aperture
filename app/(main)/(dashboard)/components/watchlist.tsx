@@ -13,7 +13,7 @@ function WatchlistRow({ item }: { item: WatchlistItem }) {
   return (
     <Link
       href={`/company/${item.ticker}`}
-      className="flex items-center justify-between px-4 py-3 transition-colors hover:bg-muted"
+      className="flex items-center justify-between px-4 py-3 transition-colors hover:bg-muted/60"
     >
       <div className="flex min-w-0 items-center gap-3">
         {/* <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#2a2a2a]">
@@ -25,10 +25,10 @@ function WatchlistRow({ item }: { item: WatchlistItem }) {
         </div>*/}
 
         <div className="min-w-0">
-          <div className="truncate text-sm font-medium leading-tight text-white">
+          <div className="truncate text-sm font-medium leading-tight text-foreground">
             {item.company}
           </div>
-          <div className="mt-0.5 text-xs font-medium uppercase tracking-wide text-[#9ca3af]">
+          <div className="mt-0.5 text-xs font-medium uppercase tracking-wide text-muted-foreground">
             {item.ticker}
             {/* · HKEX */}
           </div>
@@ -36,10 +36,12 @@ function WatchlistRow({ item }: { item: WatchlistItem }) {
       </div>
 
       <div className="ml-3 shrink-0 text-right">
-        <p className="text-sm font-medium leading-tight">{item.price}</p>
+        <p className="text-sm font-medium leading-tight text-foreground">
+          {item.price}
+        </p>
         <p
           className={`mt-0.5 text-xs font-medium leading-tight ${
-            item.tone === "up" ? "text-emerald-400" : "text-red-400"
+            item.tone === "up" ? "text-emerald-500" : "text-red-500"
           }`}
         >
           {item.change}
@@ -63,7 +65,7 @@ export function WatchlistSection({ watchlist }: WatchlistSectionProps) {
         </div>
       </div>
 
-      <Card className="overflow-hidden rounded-lg border border-white/10 bg-[#171717] p-0 shadow-none">
+      <Card className="overflow-hidden rounded-lg p-0 shadow-none">
         <CardContent className="p-0">
           {watchlist.map((item) => (
             <div key={item.ticker}>

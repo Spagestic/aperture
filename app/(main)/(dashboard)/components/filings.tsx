@@ -17,17 +17,17 @@ function FilingRow({ item }: { item: FilingItem }) {
   return (
     <Link
       href={`/company/${companySlugFromTicker(item.ticker)}`}
-      className="flex items-center justify-between px-4 py-3 transition-colors hover:bg-muted"
+      className="flex items-center justify-between px-4 py-3 transition-colors hover:bg-muted/60"
     >
       <div className="min-w-0">
-        <p className="truncate text-sm font-medium leading-tight text-white">
+        <p className="truncate text-sm font-medium leading-tight text-foreground">
           {item.company}
         </p>
-        <p className="mt-0.5 text-xs font-medium uppercase tracking-wide text-[#9ca3af]">
+        <p className="mt-0.5 text-xs font-medium uppercase tracking-wide text-muted-foreground">
           {item.ticker} · {item.type}
         </p>
       </div>
-      <p className="ml-3 shrink-0 text-right text-xs font-medium leading-tight text-[#9ca3af]">
+      <p className="ml-3 shrink-0 text-right text-xs font-medium leading-tight text-muted-foreground">
         {item.time}
       </p>
     </Link>
@@ -50,7 +50,7 @@ export function LatestFilingsSection({
         </div>
       </div>
 
-      <Card className="overflow-hidden rounded-lg border border-white/10 bg-[#171717] p-0 shadow-none">
+      <Card className="overflow-hidden rounded-lg border border-border/60 bg-background p-0 shadow-none">
         <CardContent className="p-0">
           {latestFilings.map((item) => (
             <FilingRow key={`${item.ticker}-${item.type}`} item={item} />
