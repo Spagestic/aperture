@@ -1,10 +1,22 @@
+"use client";
+
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import { IconShare3, IconBell } from "@tabler/icons-react";
+import { useTheme } from "next-themes";
+import {
+  IconShare3,
+  IconBell,
+  IconMoonStars,
+  IconSunHigh,
+} from "@tabler/icons-react";
 import { Searchbar } from "./search-bar";
 
 export function SiteHeader() {
+  const { theme, setTheme } = useTheme();
+
+  const isDark = theme === "dark";
+
   return (
     <header className="flex h-(--header-height) shrink-0 items-center gap-2 border-b transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-(--header-height)">
       <div className="flex w-full items-center justify-between gap-1 px-4 lg:gap-2 lg:px-6">
@@ -17,6 +29,14 @@ export function SiteHeader() {
         </div>
         <Searchbar />
         <div className=" flex items-center gap-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setTheme(isDark ? "light" : "dark")}
+            aria-label="Toggle theme"
+          >
+            {isDark ? <IconSunHigh /> : <IconMoonStars />}
+          </Button>
           <Button variant="ghost" size="sm">
             <IconBell />
           </Button>
