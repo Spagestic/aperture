@@ -3,12 +3,28 @@
 import Link from "next/link";
 import { ColumnDef } from "@tanstack/react-table";
 
-import { Doc } from "@/convex/_generated/dataModel";
 import { DataTableColumnHeader } from "./data-table-column-header";
 import { CompanyRowActions } from "./company-row-actions";
 import { CompanyPriceCell } from "./company-price-cell";
 
-export type CompanyRow = Doc<"companies">;
+export type CompanyRow = {
+  ticker: string;
+  name: string;
+  exchange: string;
+  websiteUrl?: string;
+  latestFilingDate?: string;
+  country?: string;
+  sector?: string;
+  industry?: string;
+  currency?: string;
+  listedBoard?: string;
+  description?: string;
+  category?: string;
+  subCategory?: string;
+  boardLot?: string;
+  isin?: string;
+  rmbCounter?: string;
+};
 
 function formatFilingDate(isoDay: string): string {
   try {
