@@ -26,7 +26,7 @@ export function CompanyDataTableToolbar({
           placeholder="Filter by name, ticker, description, or filing date..."
           value={filterValue}
           onChange={(event) => tickerCol?.setFilterValue(event.target.value)}
-          className="h-8 w-42 lg:w-70"
+          className="h-8 w-64 lg:w-96"
         />
         {isFiltered && (
           <Button
