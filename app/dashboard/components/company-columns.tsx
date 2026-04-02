@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { ColumnDef } from "@tanstack/react-table";
 
 import { DataTableColumnHeader } from "./data-table-column-header";
@@ -44,14 +43,7 @@ export const companyColumns: ColumnDef<CompanyRow>[] = [
     ),
     cell: ({ row }) => {
       const ticker = row.getValue("ticker") as string;
-      return (
-        <Link
-          href={`/company/${encodeURIComponent(ticker)}/documents`}
-          className="font-medium text-primary hover:underline"
-        >
-          {ticker}
-        </Link>
-      );
+      return <span className="font-medium text-primary">{ticker}</span>;
     },
     filterFn: (row, _id, value) => {
       const q = String(value).toLowerCase().trim();

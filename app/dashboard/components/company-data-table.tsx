@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useRouter } from "next/navigation";
 import {
   ColumnDef,
   ColumnFiltersState,
@@ -34,9 +35,52 @@ interface CompanyDataTableProps {
 }
 
 export function CompanyDataTable({ columns, data }: CompanyDataTableProps) {
-  const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
+  const router = useRouter();
+  const [columnVisibility, setColumnVisibility] =
+    React.useState<VisibilityState>({});
+  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
+    [],
+  );
   const [sorting, setSorting] = React.useState<SortingState>([]);
+
+  const handleRowClick = React.useCallback(
+    (ticker: string) => (event: React.MouseEvent<HTMLTableRowElement>) => {
+      const target = event.target as HTMLElement;
+
+      if (
+        target.closest(
+          "button,a,input,textarea,select,[role='button'],[role='menuitem']",
+        )
+      ) {
+        return;
+      }
+
+      router.push(`/ticker/${encodeURIComponent(ticker)}`);
+    },
+    [router],
+  );
+
+  const handleRowKeyDown = React.useCallback(
+    (ticker: string) => (event: React.KeyboardEvent<HTMLTableRowElement>) => {
+      if (event.key !== "Enter" && event.key !== " ") {
+        return;
+      }
+
+      const target = event.target as HTMLElement;
+
+      if (
+        target.closest(
+          "button,a,input,textarea,select,[role='button'],[role='menuitem']",
+        )
+      ) {
+        return;
+      }
+
+      event.preventDefault();
+      router.push(`/ticker/${encodeURIComponent(ticker)}`);
+    },
+    [router],
+  );
 
   const table = useReactTable({
     data,
@@ -72,7 +116,10 @@ export function CompanyDataTable({ columns, data }: CompanyDataTableProps) {
                   <TableHead key={header.id} colSpan={header.colSpan}>
                     {header.isPlaceholder
                       ? null
-                      : flexRender(header.column.columnDef.header, header.getContext())}
+                      : flexRender(
+                          header.column.columnDef.header,
+                          header.getContext(),
+                        )}
                   </TableHead>
                 ))}
               </TableRow>
@@ -81,17 +128,31 @@ export function CompanyDataTable({ columns, data }: CompanyDataTableProps) {
           <TableBody>
             {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
-                <TableRow key={row.id}>
+                <TableRow
+                  key={row.id}
+                  className="cursor-pointer"
+                  role="link"
+                  tabIndex={0}
+                  aria-label={`Open ticker ${row.original.ticker}`}
+                  onClick={handleRowClick(row.original.ticker)}
+                  onKeyDown={handleRowKeyDown(row.original.ticker)}
+                >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext(),
+                      )}
                     </TableCell>
                   ))}
                 </TableRow>
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={columns.length} className="h-24 text-center">
+                <TableCell
+                  colSpan={columns.length}
+                  className="h-24 text-center"
+                >
                   No companies found.
                 </TableCell>
               </TableRow>
