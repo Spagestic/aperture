@@ -57,7 +57,7 @@ export const companyColumns: ColumnDef<CompanyRow>[] = [
       const q = String(value).toLowerCase().trim();
       if (!q) return true;
       const c = row.original;
-      const hay = [c.ticker, c.name, c.description, c.latestFilingDate]
+      const hay = [c.ticker, c.name, c.boardLot, c.currency, c.latestFilingDate]
         .filter(Boolean)
         .join(" ")
         .toLowerCase();
@@ -83,19 +83,30 @@ export const companyColumns: ColumnDef<CompanyRow>[] = [
     enableSorting: false,
   },
   {
-    accessorKey: "description",
+    accessorKey: "boardLot",
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Description" />
+      <DataTableColumnHeader column={column} title="Board Lot" />
     ),
     cell: ({ row }) => {
-      const v = row.getValue("description") as string | undefined;
-      if (!v) {
-        return <span className="text-muted-foreground">—</span>;
-      }
-      return (
-        <span className="text-muted-foreground max-w-70 truncate" title={v}>
-          {v}
-        </span>
+      const v = row.getValue("boardLot") as string | undefined;
+      return v ? (
+        <span className="tabular-nums">{v}</span>
+      ) : (
+        <span className="text-muted-foreground">—</span>
+      );
+    },
+  },
+  {
+    accessorKey: "currency",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Trading Currency" />
+    ),
+    cell: ({ row }) => {
+      const v = row.getValue("currency") as string | undefined;
+      return v ? (
+        <span className="tabular-nums">{v}</span>
+      ) : (
+        <span className="text-muted-foreground">—</span>
       );
     },
   },
