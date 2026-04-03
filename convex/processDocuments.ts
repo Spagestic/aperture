@@ -1,6 +1,7 @@
 import { action } from "./_generated/server";
 import { v } from "convex/values";
 import { api } from "./_generated/api";
+import type { Doc, Id } from "./_generated/dataModel";
 
 type DocumentType =
   | "Annual Report"
@@ -203,5 +204,49 @@ export const processPendingDocument = action({
       });
       throw err;
     }
+  },
+});
+
+export const retryFailedDocuments = action({
+  args: {
+    ticker: v.string(),
+  },
+  handler: async (
+    ctx,
+    args,
+  ): Promise<{ success: boolean; processed: number; attempted: number }> => {
+    const company = (await ctx.runQuery(api.companies.getByTicker, {
+      ticker: args.ticker,
+    })) as { _id: Id<"companies"> } | null;
+
+    if (!company) {
+      throw new Error(`Company not found with ticker: ${args.ticker}`);
+    }
+
+    const failedDocs = (await ctx.runQuery(api.documents.listByCompany, {
+      companyId: company._id,
+    })) as Doc<"documents">[];
+
+    const retryTargets: Doc<"documents">[] = failedDocs.filter(
+      (doc) => doc.status === "failed",
+    );
+    let processed = 0;
+
+    for (const doc of retryTargets) {
+      try {
+        await ctx.runAction(api.processDocuments.processPendingDocument, {
+          documentId: doc._id,
+        });
+        processed++;
+      } catch (error) {
+        console.error(`Failed to retry document ${doc._id}`, error);
+      }
+    }
+
+    return {
+      success: true,
+      processed,
+      attempted: retryTargets.length,
+    };
   },
 });

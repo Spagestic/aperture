@@ -15,7 +15,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
-import { RefreshCw, Link2 } from "lucide-react";
+import { RefreshCw, Link2, TriangleAlert } from "lucide-react";
 
 function formatDate(iso?: string) {
   if (!iso) return "—";
@@ -42,10 +42,11 @@ function statusTone(status: string) {
 }
 
 export function CompanyDocumentsClient({ ticker }: { ticker: string }) {
-  const [isDiscovering, setIsDiscovering] = useState(false);
+  const [isBusy, setIsBusy] = useState(false);
   const documents = useQuery(api.documents.listByTicker, { ticker });
   const company = useQuery(api.companies.getByTicker, { ticker });
   const startDiscovery = useAction(api.discoverDocuments.mapCompanyDocuments);
+  const retryFailed = useAction(api.processDocuments.retryFailedDocuments);
 
   const counts = useMemo(() => {
     const base = { pending: 0, processing: 0, completed: 0, failed: 0 };
@@ -58,11 +59,20 @@ export function CompanyDocumentsClient({ ticker }: { ticker: string }) {
   }, [documents]);
 
   const onDiscover = async () => {
-    setIsDiscovering(true);
+    setIsBusy(true);
     try {
       await startDiscovery({ ticker });
     } finally {
-      setIsDiscovering(false);
+      setIsBusy(false);
+    }
+  };
+
+  const onRetryFailed = async () => {
+    setIsBusy(true);
+    try {
+      await retryFailed({ ticker });
+    } finally {
+      setIsBusy(false);
     }
   };
 
@@ -91,6 +101,7 @@ export function CompanyDocumentsClient({ ticker }: { ticker: string }) {
   }
 
   const hasDocuments = documents.length > 0;
+  const hasFailed = counts.failed > 0;
 
   return (
     <div className="space-y-6">
@@ -117,14 +128,23 @@ export function CompanyDocumentsClient({ ticker }: { ticker: string }) {
             <div>
               <CardTitle>Financial document workspace</CardTitle>
               <CardDescription>
-                Discover HKEX filings from Firecrawl, then keep browsing this
-                page while Convex finishes extracting titles and PDF links.
+                Discover HKEX filings from Firecrawl, retry failed OCR jobs, and
+                keep browsing this page while Convex finishes extracting titles
+                and PDF links.
               </CardDescription>
             </div>
             <div className="flex flex-wrap items-center gap-2">
-              <Button onClick={onDiscover} disabled={isDiscovering}>
-                <RefreshCw className={isDiscovering ? "animate-spin" : ""} />
-                {isDiscovering ? "Scanning…" : "Run discovery"}
+              <Button onClick={onDiscover} disabled={isBusy}>
+                <RefreshCw className={isBusy ? "animate-spin" : ""} />
+                {isBusy ? "Working…" : "Run discovery"}
+              </Button>
+              <Button
+                variant="outline"
+                onClick={onRetryFailed}
+                disabled={isBusy || !hasFailed}
+              >
+                <TriangleAlert />
+                Retry failed
               </Button>
               {company.websiteUrl ? (
                 <Button variant="outline" asChild>
@@ -137,7 +157,7 @@ export function CompanyDocumentsClient({ ticker }: { ticker: string }) {
             </div>
           </div>
         </CardHeader>
-        <CardContent className="pt-6">
+        <CardContent className="pt-6 space-y-4">
           {!company.websiteUrl ? (
             <Card>
               <CardHeader>
@@ -159,7 +179,24 @@ export function CompanyDocumentsClient({ ticker }: { ticker: string }) {
                 </CardDescription>
               </CardHeader>
             </Card>
-          ) : (
+          ) : null}
+
+          {hasFailed ? (
+            <Card className="border-amber-500/40 bg-amber-500/5">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-amber-600">
+                  <TriangleAlert className="size-4" />
+                  Some documents failed to process
+                </CardTitle>
+                <CardDescription>
+                  Use <strong>Retry failed</strong> to run OCR again for the
+                  failed items.
+                </CardDescription>
+              </CardHeader>
+            </Card>
+          ) : null}
+
+          {hasDocuments ? (
             <div className="rounded-md border">
               <ScrollArea className="max-h-152 rounded-md">
                 <Table>
@@ -211,7 +248,7 @@ export function CompanyDocumentsClient({ ticker }: { ticker: string }) {
                 <ScrollBar orientation="vertical" />
               </ScrollArea>
             </div>
-          )}
+          ) : null}
         </CardContent>
       </Card>
     </div>
