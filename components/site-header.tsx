@@ -1,5 +1,6 @@
 "use client";
 
+import * as React from "react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
@@ -14,6 +15,11 @@ import { Searchbar } from "./search-bar";
 
 export function SiteHeader() {
   const { theme, setTheme } = useTheme();
+  const [mounted, setMounted] = React.useState(false);
+
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const isDark = theme === "dark";
 
@@ -35,7 +41,15 @@ export function SiteHeader() {
             onClick={() => setTheme(isDark ? "light" : "dark")}
             aria-label="Toggle theme"
           >
-            {isDark ? <IconSunHigh /> : <IconMoonStars />}
+            {mounted ? (
+              isDark ? (
+                <IconSunHigh />
+              ) : (
+                <IconMoonStars />
+              )
+            ) : (
+              <span className="size-5" aria-hidden="true" />
+            )}
           </Button>
           <Button variant="ghost" size="sm">
             <IconBell />
