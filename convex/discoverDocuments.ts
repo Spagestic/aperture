@@ -90,7 +90,11 @@ async function buildPdfContextTitleMap(
 
     for (const page of crawlResult.data as CrawlPage[]) {
       const pageTitle = page.metadata?.title?.trim();
-      if (!pageTitle || isGenericTitle(pageTitle) || !Array.isArray(page.links)) {
+      if (
+        !pageTitle ||
+        isGenericTitle(pageTitle) ||
+        !Array.isArray(page.links)
+      ) {
         continue;
       }
 
@@ -137,7 +141,9 @@ export const mapCompanyDocuments = action({
       throw new Error(`Company ${company.ticker} has no websiteUrl set.`);
     }
 
-    console.log(`Starting Firecrawl discovery for ${company.ticker} at ${company.websiteUrl}`);
+    console.log(
+      `Starting Firecrawl discovery for ${company.ticker} at ${company.websiteUrl}`,
+    );
     const firecrawl = getFirecrawlClient();
 
     const mapResult = (await firecrawl.map(company.websiteUrl, {
@@ -152,7 +158,16 @@ export const mapCompanyDocuments = action({
       throw new Error("Failed to map via Firecrawl");
     }
 
-    const links: string[] = Array.isArray(mapResult.links) ? mapResult.links : [];
+    const links: string[] = Array.isArray(mapResult.links)
+      ? mapResult.links
+      : [];
+
+    const existingDocs = await ctx.runQuery(api.documents.listByCompany, {
+      companyId: company._id,
+    });
+    const existingPdfUrls = new Set(
+      existingDocs.map((doc) => normalizeUrl(doc.pdfUrl)),
+    );
 
     // Filter for PDF links or common report pages
     const pdfLinks = links.filter(
@@ -168,14 +183,21 @@ export const mapCompanyDocuments = action({
     );
 
     console.log(`Found ${uniqueLinks.length} potential documents/PDFs.`);
-    const contextualTitleMap = await buildPdfContextTitleMap(company.websiteUrl);
+    const contextualTitleMap = await buildPdfContextTitleMap(
+      company.websiteUrl,
+    );
 
     // Insert these findings into Convex DB as "pending" documents.
     const addedDocs: string[] = [];
     for (const link of uniqueLinks) {
+      const normalizedLink = normalizeUrl(link);
+      if (existingPdfUrls.has(normalizedLink)) {
+        continue;
+      }
+
       const type = inferDocumentType(link);
       const fallbackTitle = titleFromUrl(link);
-      const contextualTitle = contextualTitleMap.get(normalizeUrl(link));
+      const contextualTitle = contextualTitleMap.get(normalizedLink);
       const finalTitle =
         contextualTitle && !isGenericTitle(contextualTitle)
           ? contextualTitle

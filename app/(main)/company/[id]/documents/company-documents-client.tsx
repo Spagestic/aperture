@@ -1,73 +1,219 @@
 "use client";
 
-import { useQuery } from "convex/react";
+import { useMemo, useState } from "react";
+import { useAction, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import {
   Card,
   CardHeader,
   CardTitle,
   CardDescription,
+  CardContent,
 } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import { Button } from "@/components/ui/button";
+import { RefreshCw, Link2 } from "lucide-react";
+
+function formatDate(iso?: string) {
+  if (!iso) return "—";
+  try {
+    return new Intl.DateTimeFormat("en-HK", { dateStyle: "medium" }).format(
+      new Date(`${iso.slice(0, 10)}T12:00:00`),
+    );
+  } catch {
+    return iso;
+  }
+}
+
+function statusTone(status: string) {
+  switch (status) {
+    case "completed":
+      return "default";
+    case "processing":
+      return "secondary";
+    case "failed":
+      return "destructive";
+    default:
+      return "outline";
+  }
+}
 
 export function CompanyDocumentsClient({ ticker }: { ticker: string }) {
+  const [isDiscovering, setIsDiscovering] = useState(false);
   const documents = useQuery(api.documents.listByTicker, { ticker });
+  const company = useQuery(api.companies.getByTicker, { ticker });
+  const startDiscovery = useAction(api.discoverDocuments.mapCompanyDocuments);
 
-  if (documents === undefined) {
+  const counts = useMemo(() => {
+    const base = { pending: 0, processing: 0, completed: 0, failed: 0 };
+    for (const doc of documents ?? []) {
+      if (doc.status in base) {
+        base[doc.status as keyof typeof base] += 1;
+      }
+    }
+    return base;
+  }, [documents]);
+
+  const onDiscover = async () => {
+    setIsDiscovering(true);
+    try {
+      await startDiscovery({ ticker });
+    } finally {
+      setIsDiscovering(false);
+    }
+  };
+
+  if (documents === undefined || company === undefined) {
     return (
       <div className="space-y-4">
         <Skeleton className="h-32 w-full" />
         <Skeleton className="h-32 w-full" />
-        <Skeleton className="h-32 w-full" />
+        <Skeleton className="h-64 w-full" />
       </div>
     );
   }
 
-  if (documents.length === 0) {
+  if (!company) {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>No Documents Found</CardTitle>
+          <CardTitle>Company not found</CardTitle>
           <CardDescription>
-            We couldn&apos;t find any documents for {ticker} in our database.
+            We couldn&apos;t find a Convex company record for {ticker} yet. The
+            dashboard entry may need to seed this company first.
           </CardDescription>
         </CardHeader>
       </Card>
     );
   }
 
+  const hasDocuments = documents.length > 0;
+
   return (
-    <div className="rounded-md border">
-      <ScrollArea className="h-140 rounded-md border">
-        <Table>
-          <TableBody>
-            {documents.map((doc) => {
-              return (
-                <TableRow
-                  key={doc._id}
-                  className="cursor-pointer hover:bg-muted/50 transition-colors"
-                  onClick={() =>
-                    window.open(doc.pdfUrl, "_blank", "noopener,noreferrer")
-                  }
-                >
-                  <TableCell className="font-medium">
-                    <div className="flex items-center gap-2">
-                      <Badge variant="outline" className="w-fit">
-                        {doc.type}
-                      </Badge>
-                      <span className="line-clamp-2">{doc.title}</span>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              );
-            })}
-          </TableBody>
-        </Table>
-        <ScrollBar orientation="vertical" />
-      </ScrollArea>
+    <div className="space-y-6">
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
+        {[
+          { label: "Total", value: documents.length },
+          { label: "Pending", value: counts.pending },
+          { label: "Processing", value: counts.processing },
+          { label: "Completed", value: counts.completed },
+          { label: "Failed", value: counts.failed },
+        ].map((item) => (
+          <Card key={item.label} size="sm">
+            <CardHeader className="pb-2">
+              <CardDescription>{item.label}</CardDescription>
+              <CardTitle className="text-2xl">{item.value}</CardTitle>
+            </CardHeader>
+          </Card>
+        ))}
+      </div>
+
+      <Card>
+        <CardHeader className="border-b">
+          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <div>
+              <CardTitle>Financial document workspace</CardTitle>
+              <CardDescription>
+                Discover HKEX filings from Firecrawl, then keep browsing this
+                page while Convex finishes extracting titles and PDF links.
+              </CardDescription>
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              <Button onClick={onDiscover} disabled={isDiscovering}>
+                <RefreshCw className={isDiscovering ? "animate-spin" : ""} />
+                {isDiscovering ? "Scanning…" : "Run discovery"}
+              </Button>
+              {company.websiteUrl ? (
+                <Button variant="outline" asChild>
+                  <a href={company.websiteUrl} target="_blank" rel="noreferrer">
+                    <Link2 />
+                    Company website
+                  </a>
+                </Button>
+              ) : null}
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent className="pt-6">
+          {!company.websiteUrl ? (
+            <Card>
+              <CardHeader>
+                <CardTitle>Discovery unavailable</CardTitle>
+                <CardDescription>
+                  This company does not yet have a websiteUrl in Convex, so
+                  Firecrawl cannot start until that field is added.
+                </CardDescription>
+              </CardHeader>
+            </Card>
+          ) : !hasDocuments ? (
+            <Card>
+              <CardHeader>
+                <CardTitle>No documents discovered yet</CardTitle>
+                <CardDescription>
+                  Click <strong>Run discovery</strong> to scan {ticker} for
+                  annual reports, interim reports, announcements, and other
+                  PDFs.
+                </CardDescription>
+              </CardHeader>
+            </Card>
+          ) : (
+            <div className="rounded-md border">
+              <ScrollArea className="max-h-152 rounded-md">
+                <Table>
+                  <TableBody>
+                    {documents.map((doc) => (
+                      <TableRow
+                        key={doc._id}
+                        className="cursor-pointer transition-colors hover:bg-muted/50"
+                        onClick={() =>
+                          window.open(
+                            doc.pdfUrl,
+                            "_blank",
+                            "noopener,noreferrer",
+                          )
+                        }
+                      >
+                        <TableCell className="w-md align-top font-medium">
+                          <div className="flex flex-col gap-1">
+                            <div className="flex flex-wrap items-center gap-2">
+                              <Badge variant={statusTone(doc.status)}>
+                                {doc.status}
+                              </Badge>
+                              <Badge variant="outline">{doc.type}</Badge>
+                            </div>
+                            <span className="line-clamp-2">{doc.title}</span>
+                          </div>
+                        </TableCell>
+                        <TableCell className="align-top text-muted-foreground">
+                          {formatDate(doc.publishedDate)}
+                        </TableCell>
+                        <TableCell className="align-top text-muted-foreground">
+                          {doc.pdfUrl}
+                        </TableCell>
+                        <TableCell className="align-top text-right">
+                          <Button variant="ghost" size="sm" asChild>
+                            <a
+                              href={doc.pdfUrl}
+                              target="_blank"
+                              rel="noreferrer"
+                            >
+                              Open PDF
+                            </a>
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+                <ScrollBar orientation="vertical" />
+              </ScrollArea>
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }
