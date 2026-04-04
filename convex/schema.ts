@@ -68,4 +68,43 @@ export default defineSchema({
   })
     .index("by_company", ["companyId"])
     .index("by_status", ["status"]),
+
+  documentDiscoveryJobs: defineTable({
+    companyId: v.id("companies"),
+    ticker: v.string(),
+    status: v.union(
+      v.literal("queued"),
+      v.literal("mapping"),
+      v.literal("context"),
+      v.literal("persisting"),
+      v.literal("completed"),
+      v.literal("failed"),
+    ),
+    errorMessage: v.optional(v.string()),
+    totalCandidates: v.number(),
+    savedCount: v.number(),
+    skippedDuplicateCount: v.number(),
+    phaseDetail: v.optional(v.string()),
+    /** URL Firecrawl searched/crawled (IR page or listing fallback) */
+    discoverySeedUrl: v.optional(v.string()),
+  }).index("by_company", ["companyId"]),
+
+  discoveryLinkCandidates: defineTable({
+    jobId: v.id("documentDiscoveryJobs"),
+    normalizedUrl: v.string(),
+    url: v.string(),
+    title: v.string(),
+    documentType: v.union(
+      v.literal("Annual Report"),
+      v.literal("Interim Report"),
+      v.literal("Announcement"),
+      v.literal("Press Release"),
+      v.literal("Other"),
+    ),
+    state: v.union(
+      v.literal("pending"),
+      v.literal("inserted"),
+      v.literal("skipped"),
+    ),
+  }).index("by_job_and_state", ["jobId", "state"]),
 });

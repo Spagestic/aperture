@@ -20,6 +20,7 @@ interface CompanyRowActionsProps {
 
 export function CompanyRowActions({ row }: CompanyRowActionsProps) {
   const company = row.original;
+  const tickerWorkspaceHref = `/ticker/${encodeURIComponent(company.ticker)}`;
   const documentsHref = `/company/${encodeURIComponent(company.ticker)}/documents`;
 
   return (
@@ -36,7 +37,10 @@ export function CompanyRowActions({ row }: CompanyRowActionsProps) {
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-45">
         <DropdownMenuItem asChild>
-          <Link href={documentsHref}>View documents</Link>
+          <Link href={tickerWorkspaceHref}>Ticker workspace</Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link href={documentsHref}>View documents (legacy)</Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
           <Link

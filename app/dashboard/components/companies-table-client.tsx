@@ -4,11 +4,11 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 import { companyColumns, type CompanyRow } from "./company-columns";
 import { CompanyDataTable } from "./company-data-table";
+import {
+  formatListedTicker,
+  hkexSecuritiesPriceUrl,
+} from "@/lib/hkexUrls";
 import type { SecurityRecord } from "../lib/load-securities";
-
-function formatTicker(stockCode: number): string {
-  return `${String(stockCode).padStart(4, "0")}.HK`;
-}
 
 function formatDescription(record: SecurityRecord): string {
   return [
@@ -21,13 +21,13 @@ function formatDescription(record: SecurityRecord): string {
 }
 
 function toCompanyRow(record: SecurityRecord): CompanyRow {
-  const ticker = formatTicker(record["Stock Code"]);
+  const ticker = formatListedTicker(record["Stock Code"]);
 
   return {
     ticker,
     name: record["Name of Securities"],
     exchange: record["Sub-Category"],
-    websiteUrl: `https://www.hkex.com.hk/Market-Data/Securities-Prices/Equities?sc_lang=en&symbol=${encodeURIComponent(ticker)}`,
+    websiteUrl: hkexSecuritiesPriceUrl(ticker),
     description: formatDescription(record),
     category: record.Category,
     subCategory: record["Sub-Category"],

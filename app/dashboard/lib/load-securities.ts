@@ -1,6 +1,8 @@
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 
+import { formatListedTicker } from "@/lib/hkexUrls";
+
 export type SecurityRecord = {
   "Stock Code": number;
   "Name of Securities": string;
@@ -26,4 +28,13 @@ export async function loadSecurities(): Promise<SecurityRecord[]> {
     .map((line) => line.trim())
     .filter(Boolean)
     .map((line) => JSON.parse(line) as SecurityRecord);
+}
+
+export function getSecurityByTicker(
+  ticker: string,
+  securities: SecurityRecord[],
+): SecurityRecord | undefined {
+  return securities.find(
+    (r) => formatListedTicker(r["Stock Code"]) === ticker,
+  );
 }
