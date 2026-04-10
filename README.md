@@ -28,3 +28,63 @@ flowchart TD
     style F fill:#4338ca, color:white
     style Z fill:#991b1b, color:white
 ```
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+Make sure you have:
+
+- [Bun](https://bun.sh/)
+- a [Convex account](https://convex.dev/)
+- API keys for the services you want to enable
+
+### Installation
+
+1. **Clone the repository**
+
+   ```bash
+   git clone <your-repo-url>
+   cd aperture
+   ```
+
+2. **Install dependencies**
+
+   ```bash
+   bun install
+   ```
+
+3. **Set up environment variables**
+
+   ```bash
+   cp .env.example .env.local
+   ```
+
+4. **Add your environment variables**
+
+   ```env
+   CONVEX_DEPLOYMENT=<your-convex-deployment>
+   NEXT_PUBLIC_CONVEX_URL=<your-convex-url>
+   NEXT_PUBLIC_CONVEX_SITE_URL=<your-convex-site-url>
+
+   MISTRAL_API_KEY=<your-mistral-key>
+   FIRECRAWL_API_KEY=<your-firecrawl-key>
+   ```
+
+5. **Initialize Convex Auth**
+
+   ```bash
+   npx @convex-dev/auth
+   ```
+
+6. **Run the development server**
+
+   ```bash
+   bun run dev
+   ```
+
+7. **Open the app**
+
+   Visit: [http://localhost:3000](http://localhost:3000)
+
+---
