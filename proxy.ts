@@ -9,12 +9,7 @@ const isSignInPage = createRouteMatcher(["/login", "/signup"]);
 const isProtectedRoute = createRouteMatcher(["/protected(.*)"]);
 const isProtectedApiRoute = createRouteMatcher(["/api(.*)"]);
 // Temporarily
-const isPublicApiRoute = createRouteMatcher([
-  "/api/fmp(.*)",
-  "/api/finnhub(.*)",
-  "/api/yahoo(.*)",
-  "/api/company-financials(.*)",
-]);
+const isPublicApiRoute = createRouteMatcher([]);
 
 export const proxy = convexAuthNextjsMiddleware(
   async (request, { convexAuth }) => {

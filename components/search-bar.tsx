@@ -56,18 +56,18 @@ export function Searchbar() {
       >
         <SearchIcon className="size-4 shrink-0" />
         <span className="md:hidden truncate font-normal text-sm text-muted-foreground">
-          Search stocks...
+          Search events...
         </span>
         <span className="hidden md:inline-flex text-sm truncate font-normal text-muted-foreground">
-          Search stocks, filings, metrics, people, reports and more...
+          Search Polymarket events, markets, outcomes and more...
         </span>
         <span className="sr-only">
-          Search stocks, filings, metrics, people, reports and more...
+          Search Polymarket events, markets, outcomes and more...
         </span>
       </Button>
       <CommandDialog open={open} onOpenChange={setOpen}>
         <Command>
-          <CommandInput placeholder="Type a command or search..." />
+          <CommandInput placeholder="Search Polymarket events or type a command..." />
           <CommandList>
             <CommandEmpty>No results found.</CommandEmpty>
             <CommandGroup heading="Navigation">

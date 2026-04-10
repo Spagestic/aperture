@@ -1,5 +1,4 @@
 // app/(main)/layout.tsx
-import { AppSidebar } from "@/components/sidebar/app-sidebar";
 import { SiteHeader } from "@/components/site-header";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 
@@ -13,7 +12,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         } as React.CSSProperties
       }
     >
-      <AppSidebar />
       <SidebarInset>
         <SiteHeader />
         <main className="flex flex-1 flex-col">{children}</main>
