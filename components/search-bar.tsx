@@ -3,41 +3,21 @@
 import * as React from "react";
 import { Button } from "@/components/ui/button";
 import {
-  Command,
   CommandDialog,
   CommandEmpty,
   CommandGroup,
   CommandInput,
   CommandItem,
   CommandList,
-  CommandSeparator,
-  CommandShortcut,
 } from "@/components/ui/command";
 import {
-  BellIcon,
-  CalculatorIcon,
-  CalendarIcon,
-  ClipboardPasteIcon,
-  CodeIcon,
-  CopyIcon,
-  CreditCardIcon,
-  FileTextIcon,
-  FolderIcon,
-  FolderPlusIcon,
-  HelpCircleIcon,
-  HomeIcon,
-  ImageIcon,
-  InboxIcon,
-  LayoutGridIcon,
-  ListIcon,
-  PlusIcon,
-  ScissorsIcon,
-  SettingsIcon,
-  TrashIcon,
-  UserIcon,
-  ZoomInIcon,
-  ZoomOutIcon,
+  ClockIcon,
+  DropletIcon,
+  FlameIcon,
   SearchIcon,
+  SparklesIcon,
+  SwordsIcon,
+  TrendingUpIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -66,133 +46,134 @@ export function Searchbar() {
         </span>
       </Button>
       <CommandDialog open={open} onOpenChange={setOpen}>
-        <Command>
-          <CommandInput placeholder="Search Polymarket events or type a command..." />
-          <CommandList>
-            <CommandEmpty>No results found.</CommandEmpty>
-            <CommandGroup heading="Navigation">
-              <CommandItem>
-                <HomeIcon />
-                <span>Home</span>
-                <CommandShortcut>⌘H</CommandShortcut>
+        <CommandInput placeholder="Search Polymarket events or type a command..." />
+        <CommandList className="max-h-[80vh] overflow-y-auto">
+          <CommandEmpty>No results found.</CommandEmpty>
+
+          <CommandGroup heading="HOW TO BROWSE" className="px-2 py-4">
+            <div className="flex flex-wrap gap-2">
+              <CommandItem
+                value="New"
+                className="h-9 rounded-full border border-muted-foreground/20 bg-card hover:bg-accent hover:text-accent-foreground text-sm aria-selected:bg-accent aria-selected:text-accent-foreground"
+              >
+                <SparklesIcon className="mr-2 size-4" />
+                New
               </CommandItem>
-              <CommandItem>
-                <InboxIcon />
-                <span>Inbox</span>
-                <CommandShortcut>⌘I</CommandShortcut>
+              <CommandItem
+                value="Trending"
+                className="h-9 rounded-full border border-muted-foreground/20 bg-card hover:bg-accent hover:text-accent-foreground text-sm aria-selected:bg-accent aria-selected:text-accent-foreground"
+              >
+                <TrendingUpIcon className="mr-2 size-4" />
+                Trending
               </CommandItem>
-              <CommandItem>
-                <FileTextIcon />
-                <span>Documents</span>
-                <CommandShortcut>⌘D</CommandShortcut>
+              <CommandItem
+                value="Popular"
+                className="h-9 rounded-full border border-muted-foreground/20 bg-card hover:bg-accent hover:text-accent-foreground text-sm aria-selected:bg-accent aria-selected:text-accent-foreground"
+              >
+                <FlameIcon className="mr-2 size-4" />
+                Popular
               </CommandItem>
-              <CommandItem>
-                <FolderIcon />
-                <span>Folders</span>
-                <CommandShortcut>⌘F</CommandShortcut>
+              <CommandItem
+                value="Liquid"
+                className="h-9 rounded-full border border-muted-foreground/20 bg-card hover:bg-accent hover:text-accent-foreground text-sm aria-selected:bg-accent aria-selected:text-accent-foreground"
+              >
+                <DropletIcon className="mr-2 size-4" />
+                Liquid
               </CommandItem>
-            </CommandGroup>
-            <CommandSeparator />
-            <CommandGroup heading="Actions">
-              <CommandItem>
-                <PlusIcon />
-                <span>New File</span>
-                <CommandShortcut>⌘N</CommandShortcut>
+              <CommandItem
+                value="Ending Soon"
+                className="h-9 rounded-full border border-muted-foreground/20 bg-card hover:bg-accent hover:text-accent-foreground text-sm aria-selected:bg-accent aria-selected:text-accent-foreground"
+              >
+                <ClockIcon className="mr-2 size-4" />
+                Ending Soon
               </CommandItem>
-              <CommandItem>
-                <FolderPlusIcon />
-                <span>New Folder</span>
-                <CommandShortcut>⇧⌘N</CommandShortcut>
+              <CommandItem
+                value="Competitive"
+                className="h-9 rounded-full border border-muted-foreground/20 bg-card hover:bg-accent hover:text-accent-foreground text-sm aria-selected:bg-accent aria-selected:text-accent-foreground"
+              >
+                <SwordsIcon className="mr-2 size-4" />
+                Competitive
               </CommandItem>
-              <CommandItem>
-                <CopyIcon />
-                <span>Copy</span>
-                <CommandShortcut>⌘C</CommandShortcut>
+            </div>
+          </CommandGroup>
+
+          <CommandGroup heading="TOPICS" className="px-2 pb-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+              <CommandItem
+                value="Live Crypto"
+                className="flex items-center gap-3 rounded-xl border border-border bg-card p-3 cursor-pointer aria-selected:bg-accent aria-selected:text-accent-foreground"
+              >
+                <div className="flex size-8 items-center justify-center rounded-full bg-muted text-lg">
+                  📈
+                </div>
+                <span className="font-semibold text-sm">Live Crypto</span>
               </CommandItem>
-              <CommandItem>
-                <ScissorsIcon />
-                <span>Cut</span>
-                <CommandShortcut>⌘X</CommandShortcut>
+              <CommandItem
+                value="Politics"
+                className="flex items-center gap-3 rounded-xl border border-border bg-card p-3 cursor-pointer aria-selected:bg-accent aria-selected:text-accent-foreground"
+              >
+                <div className="flex size-8 items-center justify-center rounded-full bg-muted text-lg">
+                  🏛️
+                </div>
+                <span className="font-semibold text-sm">Politics</span>
               </CommandItem>
-              <CommandItem>
-                <ClipboardPasteIcon />
-                <span>Paste</span>
-                <CommandShortcut>⌘V</CommandShortcut>
+              <CommandItem
+                value="Middle East"
+                className="flex items-center gap-3 rounded-xl border border-border bg-card p-3 cursor-pointer aria-selected:bg-accent aria-selected:text-accent-foreground"
+              >
+                <div className="flex size-8 items-center justify-center rounded-full bg-muted text-lg">
+                  🌍
+                </div>
+                <span className="font-semibold text-sm">Middle East</span>
               </CommandItem>
-              <CommandItem>
-                <TrashIcon />
-                <span>Delete</span>
-                <CommandShortcut>⌫</CommandShortcut>
+              <CommandItem
+                value="Crypto"
+                className="flex items-center gap-3 rounded-xl border border-border bg-card p-3 cursor-pointer aria-selected:bg-accent aria-selected:text-accent-foreground"
+              >
+                <div className="flex size-8 items-center justify-center rounded-full bg-muted text-lg">
+                  ₿
+                </div>
+                <span className="font-semibold text-sm">Crypto</span>
               </CommandItem>
-            </CommandGroup>
-            <CommandSeparator />
-            <CommandGroup heading="View">
-              <CommandItem>
-                <LayoutGridIcon />
-                <span>Grid View</span>
+              <CommandItem
+                value="Sports"
+                className="flex items-center gap-3 rounded-xl border border-border bg-card p-3 cursor-pointer aria-selected:bg-accent aria-selected:text-accent-foreground"
+              >
+                <div className="flex size-8 items-center justify-center rounded-full bg-muted text-lg">
+                  🏀
+                </div>
+                <span className="font-semibold text-sm">Sports</span>
               </CommandItem>
-              <CommandItem>
-                <ListIcon />
-                <span>List View</span>
+              <CommandItem
+                value="Pop Culture"
+                className="flex items-center gap-3 rounded-xl border border-border bg-card p-3 cursor-pointer aria-selected:bg-accent aria-selected:text-accent-foreground"
+              >
+                <div className="flex size-8 items-center justify-center rounded-full bg-muted text-lg">
+                  🎬
+                </div>
+                <span className="font-semibold text-sm">Pop Culture</span>
               </CommandItem>
-              <CommandItem>
-                <ZoomInIcon />
-                <span>Zoom In</span>
-                <CommandShortcut>⌘+</CommandShortcut>
+              <CommandItem
+                value="Tech"
+                className="flex items-center gap-3 rounded-xl border border-border bg-card p-3 cursor-pointer aria-selected:bg-accent aria-selected:text-accent-foreground"
+              >
+                <div className="flex size-8 items-center justify-center rounded-full bg-muted text-lg">
+                  💻
+                </div>
+                <span className="font-semibold text-sm">Tech</span>
               </CommandItem>
-              <CommandItem>
-                <ZoomOutIcon />
-                <span>Zoom Out</span>
-                <CommandShortcut>⌘-</CommandShortcut>
+              <CommandItem
+                value="AI"
+                className="flex items-center gap-3 rounded-xl border border-border bg-card p-3 cursor-pointer aria-selected:bg-accent aria-selected:text-accent-foreground"
+              >
+                <div className="flex size-8 items-center justify-center rounded-full bg-muted text-lg">
+                  🤖
+                </div>
+                <span className="font-semibold text-sm">AI</span>
               </CommandItem>
-            </CommandGroup>
-            <CommandSeparator />
-            <CommandGroup heading="Account">
-              <CommandItem>
-                <UserIcon />
-                <span>Profile</span>
-                <CommandShortcut>⌘P</CommandShortcut>
-              </CommandItem>
-              <CommandItem>
-                <CreditCardIcon />
-                <span>Billing</span>
-                <CommandShortcut>⌘B</CommandShortcut>
-              </CommandItem>
-              <CommandItem>
-                <SettingsIcon />
-                <span>Settings</span>
-                <CommandShortcut>⌘S</CommandShortcut>
-              </CommandItem>
-              <CommandItem>
-                <BellIcon />
-                <span>Notifications</span>
-              </CommandItem>
-              <CommandItem>
-                <HelpCircleIcon />
-                <span>Help & Support</span>
-              </CommandItem>
-            </CommandGroup>
-            <CommandSeparator />
-            <CommandGroup heading="Tools">
-              <CommandItem>
-                <CalculatorIcon />
-                <span>Calculator</span>
-              </CommandItem>
-              <CommandItem>
-                <CalendarIcon />
-                <span>Calendar</span>
-              </CommandItem>
-              <CommandItem>
-                <ImageIcon />
-                <span>Image Editor</span>
-              </CommandItem>
-              <CommandItem>
-                <CodeIcon />
-                <span>Code Editor</span>
-              </CommandItem>
-            </CommandGroup>
-          </CommandList>
-        </Command>
+            </div>
+          </CommandGroup>
+        </CommandList>
       </CommandDialog>
     </div>
   );
