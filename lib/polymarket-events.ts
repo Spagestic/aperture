@@ -46,10 +46,11 @@ export async function getEventsPage(
   const urls = buildGammaEventFeedUrls(offset, limit);
 
   for (const url of urls) {
+    // Gamma often returns >2MB per page; Next.js fetch cache rejects entries over 2MB.
     const res = await fetch(url, {
-      next: { revalidate: 60 },
       headers: { Accept: "application/json" },
       ...init,
+      cache: "no-store",
     });
 
     if (res.ok) {

@@ -19,10 +19,7 @@ export async function GET(request: Request) {
     );
     const limit = Math.min(Math.max(1, limitRaw), MAX_LIMIT);
 
-    const events = await getEventsPage(
-      { offset, limit },
-      { next: { revalidate: 60 } },
-    );
+    const events = await getEventsPage({ offset, limit });
 
     return NextResponse.json(events);
   } catch (error) {
