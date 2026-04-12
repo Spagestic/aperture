@@ -26,17 +26,30 @@ export type TopOutcome = {
   probability: string;
 };
 
-const GAMMA_EVENTS_URLS = [
-  "https://gamma-api.polymarket.com/events?active=true&closed=false&archived=false&order=volume_24hr&ascending=false&limit=24",
-  "https://gamma-api.polymarket.com/events?active=true&closed=false&archived=false&order=volume24hr&ascending=false&limit=24",
-  "https://gamma-api.polymarket.com/events?active=true&closed=false&archived=false&limit=24",
-];
+function buildGammaEventFeedUrls(offset: number, limit: number): string[] {
+  const o = String(Math.max(0, offset));
+  const l = String(Math.max(1, limit));
+  return [
+    `https://gamma-api.polymarket.com/events?active=true&closed=false&archived=false&order=volume_24hr&ascending=false&limit=${l}&offset=${o}`,
+    `https://gamma-api.polymarket.com/events?active=true&closed=false&archived=false&order=volume24hr&ascending=false&limit=${l}&offset=${o}`,
+    `https://gamma-api.polymarket.com/events?active=true&closed=false&archived=false&limit=${l}&offset=${o}`,
+  ];
+}
 
-export async function getEvents(): Promise<EventItem[]> {
-  for (const url of GAMMA_EVENTS_URLS) {
+const DEFAULT_EVENTS_LIMIT = 24;
+
+export async function getEventsPage(
+  params: { offset: number; limit: number },
+  init?: RequestInit,
+): Promise<EventItem[]> {
+  const { offset, limit } = params;
+  const urls = buildGammaEventFeedUrls(offset, limit);
+
+  for (const url of urls) {
     const res = await fetch(url, {
       next: { revalidate: 60 },
       headers: { Accept: "application/json" },
+      ...init,
     });
 
     if (res.ok) {
@@ -52,6 +65,10 @@ export async function getEvents(): Promise<EventItem[]> {
   }
 
   return [];
+}
+
+export async function getEvents(): Promise<EventItem[]> {
+  return getEventsPage({ offset: 0, limit: DEFAULT_EVENTS_LIMIT });
 }
 
 export function buildEventSearchText(event: EventItem) {

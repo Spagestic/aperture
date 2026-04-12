@@ -1,7 +1,9 @@
 import { Suspense } from "react";
-import { EventCard } from "./components/event-card";
 import { EventCardSkeleton } from "./components/event-card-skeleton";
-import { getEvents, type EventItem } from "@/lib/polymarket-events";
+import { InfiniteEventGrid } from "./components/infinite-event-grid";
+import { getEventsPage, type EventItem } from "@/lib/polymarket-events";
+
+const INITIAL_PAGE_SIZE = 24;
 
 export type PolymarketEventsDashboardProps = {
   events: EventItem[];
@@ -21,7 +23,7 @@ async function DashboardContent() {
   let loadError: string | null = null;
 
   try {
-    events = await getEvents();
+    events = await getEventsPage({ offset: 0, limit: INITIAL_PAGE_SIZE });
   } catch (error) {
     loadError =
       error instanceof Error ? error.message : "Unable to load events.";
@@ -32,11 +34,12 @@ async function DashboardContent() {
       <div className="mx-auto flex w-full max-w-350 flex-col gap-6">
         {loadError ? <p className="text-red-500">{loadError}</p> : null}
 
-        <section className="grid grid-cols-1 gap-5 lg:grid-cols-2 xl:grid-cols-3">
-          {events.length > 0
-            ? events.map((event) => <EventCard key={event.id} event={event} />)
-            : null}
-        </section>
+        {events.length > 0 ? (
+          <InfiniteEventGrid
+            initialEvents={events}
+            pageSize={INITIAL_PAGE_SIZE}
+          />
+        ) : null}
       </div>
     </div>
   );
