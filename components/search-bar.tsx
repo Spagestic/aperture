@@ -3,26 +3,28 @@
 import * as React from "react";
 import { useRouter } from "next/navigation";
 import {
-  Autocomplete,
-  AutocompleteEmpty,
-  AutocompleteGroup,
-  AutocompleteGroupLabel,
-  AutocompleteInput,
-  AutocompleteItem,
-  AutocompleteList,
-  AutocompletePopup,
-} from "@/components/ui/autocomplete";
+  Popover,
+  PopoverAnchor,
+  PopoverContent,
+} from "@/components/ui/popover";
 import { Spinner } from "@/components/ui/spinner";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupButton,
+  InputGroupInput,
+} from "@/components/ui/input-group";
 import {
   BadgeDollarSignIcon,
   CalendarDaysIcon,
   ClockIcon,
+  LoaderCircleIcon,
   SearchIcon,
+  XIcon,
   SparklesIcon,
   TrendingUpIcon,
 } from "lucide-react";
 import type { EventItem } from "@/lib/polymarket-events";
-import { InputGroup } from "./ui/input-group";
 
 export function Searchbar() {
   const router = useRouter();
@@ -31,7 +33,19 @@ export function Searchbar() {
   const [items, setItems] = React.useState<EventItem[]>([]);
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
+  const inputRef = React.useRef<HTMLInputElement>(null);
   const query = value.trim();
+
+  const presets = React.useMemo(
+    () => [
+      { label: "Trending", query: "trending", icon: TrendingUpIcon },
+      { label: "Ending soon", query: "ending soon", icon: ClockIcon },
+      { label: "Featured", query: "featured", icon: SparklesIcon },
+      { label: "Finance", query: "finance", icon: BadgeDollarSignIcon },
+      { label: "Events", query: "events", icon: CalendarDaysIcon },
+    ],
+    [],
+  );
 
   React.useEffect(() => {
     if (!query) {
@@ -114,144 +128,174 @@ export function Searchbar() {
     setOpen(true);
   }, []);
 
+  const handleClear = React.useCallback(() => {
+    setValue("");
+    setItems([]);
+    setError(null);
+    setOpen(true);
+    inputRef.current?.focus();
+  }, []);
+
   return (
-    <div className="flex w-full max-w-xl flex-col gap-4">
-      <Autocomplete
-        filter={null}
-        items={items}
-        itemToStringValue={(item: unknown) =>
-          typeof item === "string"
-            ? item
-            : ((item as EventItem).title || "")
-        }
-        onValueChange={handleQueryChange}
-        open={open}
-        value={value}
-        onOpenChange={handleOpenChange}
-      >
-        <InputGroup>
-          <AutocompleteInput
-            placeholder="Search Polymarket events..."
+    <Popover open={open} onOpenChange={handleOpenChange}>
+      <PopoverAnchor asChild>
+        <InputGroup className="w-full max-w-xl bg-background shadow-sm">
+          <InputGroupInput
+            ref={inputRef}
+            value={value}
+            onChange={(event) => handleQueryChange(event.target.value)}
             onFocus={handleQueryFocus}
-            className="border-0 bg-transparent shadow-none focus-visible:ring-0"
-            startAddon={<SearchIcon />}
+            placeholder="Search Polymarket events..."
+            aria-label="Search Polymarket events"
+            autoComplete="off"
+            spellCheck={false}
           />
-        </InputGroup>
-        <AutocompletePopup aria-busy={loading || undefined} className="w-full">
-          <AutocompleteList className="max-h-[70vh]">
-            {query && loading ? (
-              <div className="flex items-center gap-2 px-3 py-2 text-muted-foreground text-sm">
-                <Spinner className="size-4 shrink-0" />
-                Searching…
+          <InputGroupAddon align="inline-start" className="pointer-events-none">
+            <SearchIcon className="text-muted-foreground" />
+          </InputGroupAddon>
+          <InputGroupAddon align="inline-end">
+            {loading ? (
+              <Spinner className="size-4" />
+            ) : query && !error ? (
+              <div className="flex items-center gap-1">
+                <span className="text-xs text-muted-foreground">
+                  {items.length} result{items.length === 1 ? "" : "s"}
+                </span>
+                <InputGroupButton
+                  aria-label="Clear search"
+                  size="icon-xs"
+                  variant="ghost"
+                  onClick={handleClear}
+                >
+                  <XIcon />
+                </InputGroupButton>
               </div>
-            ) : null}
-            {query && error ? (
-              <div className="px-3 py-2 text-destructive text-sm">{error}</div>
-            ) : null}
-            {!value.trim() ? (
-              <AutocompleteGroup>
-                <AutocompleteGroupLabel>Browse by topic</AutocompleteGroupLabel>
-                {[
-                  {
-                    label: "Trending",
-                    query: "trending",
-                    icon: TrendingUpIcon,
-                  },
-                  {
-                    label: "Ending soon",
-                    query: "ending soon",
-                    icon: ClockIcon,
-                  },
-                  { label: "Featured", query: "featured", icon: SparklesIcon },
-                  {
-                    label: "Finance",
-                    query: "finance",
-                    icon: BadgeDollarSignIcon,
-                  },
-                  { label: "Events", query: "events", icon: CalendarDaysIcon },
-                ].map(({ label, query: presetQuery, icon: Icon }) => (
-                  <AutocompleteItem
+            ) : query ? (
+              <InputGroupButton
+                aria-label="Clear search"
+                size="icon-xs"
+                variant="ghost"
+                onClick={handleClear}
+              >
+                <XIcon />
+              </InputGroupButton>
+            ) : (
+              <span className="px-2 text-[10px] font-medium tracking-wide text-muted-foreground">
+                ⌘K
+              </span>
+            )}
+          </InputGroupAddon>
+        </InputGroup>
+      </PopoverAnchor>
+
+      <PopoverContent
+        align="start"
+        sideOffset={10}
+        onOpenAutoFocus={(event) => event.preventDefault()}
+        className="w-(--radix-popover-trigger-width) max-w-[min(100vw-2rem,40rem)] p-0"
+      >
+        <div
+          className="max-h-[70vh] overflow-y-auto p-2"
+          aria-busy={loading || undefined}
+        >
+          {query && loading ? (
+            <div className="flex items-center gap-2 rounded-md px-3 py-2 text-sm text-muted-foreground">
+              <LoaderCircleIcon className="size-4 animate-spin" />
+              Searching…
+            </div>
+          ) : null}
+
+          {query && error ? (
+            <div className="rounded-md px-3 py-2 text-sm text-destructive">
+              {error}
+            </div>
+          ) : null}
+
+          {!query ? (
+            <div className="space-y-1">
+              <div className="px-3 py-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                Browse by topic
+              </div>
+              <div className="grid gap-1">
+                {presets.map(({ label, query: presetQuery, icon: Icon }) => (
+                  <button
                     key={label}
-                    value={presetQuery}
-                    className="rounded-lg border border-border/60 bg-card"
-                    onSelect={() => {
-                      handleQueryChange(presetQuery);
-                      queueMicrotask(() => setOpen(true));
-                    }}
+                    type="button"
+                    className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm transition-colors hover:bg-muted"
+                    onClick={() => handleQueryChange(presetQuery)}
                   >
-                    <Icon className="mr-2 size-4 text-muted-foreground" />
-                    {label}
-                  </AutocompleteItem>
+                    <Icon className="size-4 shrink-0 text-muted-foreground" />
+                    <span className="flex-1">{label}</span>
+                    <span className="text-xs text-muted-foreground">
+                      {presetQuery}
+                    </span>
+                  </button>
                 ))}
-              </AutocompleteGroup>
-            ) : null}
+              </div>
+            </div>
+          ) : null}
 
-            {query ? (
-              <>
-                {!loading && !error && items.length === 0 ? (
-                  <AutocompleteEmpty>
-                    No matching Polymarket events found.
-                  </AutocompleteEmpty>
-                ) : null}
+          {query && !loading && !error && items.length === 0 ? (
+            <div className="rounded-md px-3 py-3 text-sm text-muted-foreground">
+              No matching Polymarket events found.
+            </div>
+          ) : null}
 
-                {!loading && !error && items.length > 0 ? (
-                  <AutocompleteGroup>
-                    {items.map((event) => {
-                      const totalMarkets = event.markets?.length ?? 0;
-                      const iconUrl =
-                        typeof event.icon === "string" &&
-                        /^https?:\/\//.test(event.icon)
-                          ? event.icon
-                          : null;
-                      return (
-                        <AutocompleteItem
-                          key={event.id}
-                          value={event}
-                          className="rounded-md bg-card p-3"
-                          onSelect={() => handleSelect(event)}
-                        >
-                          <div className="flex w-full items-start gap-3">
-                            <div className="flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-muted text-lg">
-                              {iconUrl ? (
-                                // eslint-disable-next-line @next/next/no-img-element
-                                <img
-                                  src={iconUrl}
-                                  alt=""
-                                  className="h-full w-full object-cover"
-                                />
-                              ) : (
-                                <span>{event.icon || "🎯"}</span>
-                              )}
-                            </div>
-                            <div className="min-w-0 flex-1 space-y-1">
-                              <div className="flex flex-wrap items-center gap-2">
-                                <span className="truncate font-medium text-sm">
-                                  {event.title || "Untitled event"}
-                                </span>
-                                {event.category ? (
-                                  <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] uppercase tracking-wide text-muted-foreground">
-                                    {event.category}
-                                  </span>
-                                ) : null}
-                              </div>
-                              <p className="truncate text-xs text-muted-foreground">
-                                {event.slug || event.id}
-                                {totalMarkets > 0
-                                  ? ` · ${totalMarkets} markets`
-                                  : ""}
-                              </p>
-                            </div>
-                          </div>
-                        </AutocompleteItem>
-                      );
-                    })}
-                  </AutocompleteGroup>
-                ) : null}
-              </>
-            ) : null}
-          </AutocompleteList>
-        </AutocompletePopup>
-      </Autocomplete>
-    </div>
+          {query && !loading && !error && items.length > 0 ? (
+            <div className="grid gap-1">
+              {items.map((event) => {
+                const totalMarkets = event.markets?.length ?? 0;
+                const iconUrl =
+                  typeof event.icon === "string" &&
+                  /^https?:\/\//.test(event.icon)
+                    ? event.icon
+                    : null;
+
+                return (
+                  <button
+                    key={event.id}
+                    type="button"
+                    className="w-full rounded-md border border-border/60 bg-card p-3 text-left transition-colors hover:bg-muted/60"
+                    onClick={() => handleSelect(event)}
+                  >
+                    <div className="flex items-start gap-3">
+                      <div className="flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-muted text-lg">
+                        {iconUrl ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img
+                            src={iconUrl}
+                            alt=""
+                            className="h-full w-full object-cover"
+                          />
+                        ) : (
+                          <span>{event.icon || "🎯"}</span>
+                        )}
+                      </div>
+
+                      <div className="min-w-0 flex-1 space-y-1">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span className="truncate font-medium text-sm">
+                            {event.title || "Untitled event"}
+                          </span>
+                          {event.category ? (
+                            <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] uppercase tracking-wide text-muted-foreground">
+                              {event.category}
+                            </span>
+                          ) : null}
+                        </div>
+                        <p className="truncate text-xs text-muted-foreground">
+                          {event.slug || event.id}
+                          {totalMarkets > 0 ? ` · ${totalMarkets} markets` : ""}
+                        </p>
+                      </div>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          ) : null}
+        </div>
+      </PopoverContent>
+    </Popover>
   );
 }
