@@ -1,18 +1,20 @@
 import { NextResponse } from "next/server";
-import { buildEventSearchText, getEvents } from "@/lib/polymarket-events";
+import { searchPublicEvents } from "@/lib/polymarket-events";
 
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
-    const query = searchParams.get("q")?.trim().toLowerCase() ?? "";
+    const query = searchParams.get("q")?.trim() ?? "";
     const limit = Number(searchParams.get("limit") ?? "12");
-    const events = await getEvents();
+    const safeLimit = Number.isFinite(limit) ? limit : 12;
 
-    const filteredEvents = query
-      ? events.filter((event) => buildEventSearchText(event).includes(query))
-      : [];
+    if (!query) {
+      return NextResponse.json([]);
+    }
 
-    return NextResponse.json(filteredEvents.slice(0, Number.isFinite(limit) ? limit : 12));
+    const events = await searchPublicEvents(query, safeLimit);
+
+    return NextResponse.json(events);
   } catch (error) {
     const message =
       error instanceof Error

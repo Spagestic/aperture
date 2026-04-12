@@ -72,6 +72,49 @@ export async function getEvents(): Promise<EventItem[]> {
   return getEventsPage({ offset: 0, limit: DEFAULT_EVENTS_LIMIT });
 }
 
+type GammaPublicSearchResponse = {
+  events?: EventItem[] | null;
+};
+
+/**
+ * Server-side search across Polymarket’s catalog via Gamma public-search
+ * (not limited to the first page of the volume-sorted events feed).
+ */
+export async function searchPublicEvents(
+  query: string,
+  limitPerType: number,
+  init?: RequestInit,
+): Promise<EventItem[]> {
+  const q = query.trim();
+  if (!q) return [];
+
+  const capped = Math.max(1, Math.min(Math.floor(limitPerType), 50));
+  const params = new URLSearchParams({
+    q,
+    limit_per_type: String(capped),
+    search_profiles: "false",
+  });
+
+  const url = `https://gamma-api.polymarket.com/public-search?${params}`;
+  const res = await fetch(url, {
+    headers: { Accept: "application/json" },
+    ...init,
+    cache: "no-store",
+  });
+
+  if (!res.ok) {
+    const body = await res.text().catch(() => "");
+    throw new Error(
+      `Failed to search Polymarket (${res.status}): ${body || res.statusText}`,
+    );
+  }
+
+  const data = (await res.json()) as GammaPublicSearchResponse;
+  const events = data.events;
+  if (!Array.isArray(events)) return [];
+  return events.slice(0, capped);
+}
+
 export function buildEventSearchText(event: EventItem) {
   const marketText = (event.markets ?? [])
     .flatMap((market) => [market.question, market.id])

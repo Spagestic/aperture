@@ -183,64 +183,66 @@ export function Searchbar() {
 
             {query ? (
               <>
-                {!loading && !error ? (
+                {!loading && !error && items.length === 0 ? (
                   <AutocompleteEmpty>
                     No matching Polymarket events found.
                   </AutocompleteEmpty>
                 ) : null}
 
-                <AutocompleteGroup>
-                  <AutocompleteGroupLabel>Events</AutocompleteGroupLabel>
-                  {items.map((event) => {
-                    const totalMarkets = event.markets?.length ?? 0;
-                    const iconUrl =
-                      typeof event.icon === "string" &&
-                      /^https?:\/\//.test(event.icon)
-                        ? event.icon
-                        : null;
-                    return (
-                      <AutocompleteItem
-                        key={event.id}
-                        value={event}
-                        className="rounded-md bg-card p-3"
-                        onSelect={() => handleSelect(event)}
-                      >
-                        <div className="flex w-full items-start gap-3">
-                          <div className="flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-muted text-lg">
-                            {iconUrl ? (
-                              // eslint-disable-next-line @next/next/no-img-element
-                              <img
-                                src={iconUrl}
-                                alt=""
-                                className="h-full w-full object-cover"
-                              />
-                            ) : (
-                              <span>{event.icon || "🎯"}</span>
-                            )}
-                          </div>
-                          <div className="min-w-0 flex-1 space-y-1">
-                            <div className="flex flex-wrap items-center gap-2">
-                              <span className="truncate font-medium text-sm">
-                                {event.title || "Untitled event"}
-                              </span>
-                              {event.category ? (
-                                <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] uppercase tracking-wide text-muted-foreground">
-                                  {event.category}
-                                </span>
-                              ) : null}
+                {!loading && !error && items.length > 0 ? (
+                  <AutocompleteGroup>
+                    <AutocompleteGroupLabel>Events</AutocompleteGroupLabel>
+                    {items.map((event) => {
+                      const totalMarkets = event.markets?.length ?? 0;
+                      const iconUrl =
+                        typeof event.icon === "string" &&
+                        /^https?:\/\//.test(event.icon)
+                          ? event.icon
+                          : null;
+                      return (
+                        <AutocompleteItem
+                          key={event.id}
+                          value={event}
+                          className="rounded-md bg-card p-3"
+                          onSelect={() => handleSelect(event)}
+                        >
+                          <div className="flex w-full items-start gap-3">
+                            <div className="flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-muted text-lg">
+                              {iconUrl ? (
+                                // eslint-disable-next-line @next/next/no-img-element
+                                <img
+                                  src={iconUrl}
+                                  alt=""
+                                  className="h-full w-full object-cover"
+                                />
+                              ) : (
+                                <span>{event.icon || "🎯"}</span>
+                              )}
                             </div>
-                            <p className="truncate text-xs text-muted-foreground">
-                              {event.slug || event.id}
-                              {totalMarkets > 0
-                                ? ` · ${totalMarkets} markets`
-                                : ""}
-                            </p>
+                            <div className="min-w-0 flex-1 space-y-1">
+                              <div className="flex flex-wrap items-center gap-2">
+                                <span className="truncate font-medium text-sm">
+                                  {event.title || "Untitled event"}
+                                </span>
+                                {event.category ? (
+                                  <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] uppercase tracking-wide text-muted-foreground">
+                                    {event.category}
+                                  </span>
+                                ) : null}
+                              </div>
+                              <p className="truncate text-xs text-muted-foreground">
+                                {event.slug || event.id}
+                                {totalMarkets > 0
+                                  ? ` · ${totalMarkets} markets`
+                                  : ""}
+                              </p>
+                            </div>
                           </div>
-                        </div>
-                      </AutocompleteItem>
-                    );
-                  })}
-                </AutocompleteGroup>
+                        </AutocompleteItem>
+                      );
+                    })}
+                  </AutocompleteGroup>
+                ) : null}
               </>
             ) : null}
           </AutocompleteList>
