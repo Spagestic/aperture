@@ -9,6 +9,13 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 
 const Autocomplete = AutocompletePrimitive.Root;
 
+/** Avoid shift middleware vertical nudge on scroll (wiggle); flip still handles overflow. */
+const autocompletePopupCollisionAvoidance = {
+  side: "flip" as const,
+  align: "none" as const,
+  fallbackAxisSide: "none" as const,
+};
+
 function AutocompleteInput({
   className,
   showTrigger = false,
@@ -43,11 +50,13 @@ function AutocompleteInput({
       )}
       <AutocompletePrimitive.Input
         className={cn(
+          // className merges onto the rendered <input>; use padding on the control itself,
+          // not *:data-[slot=…] (inputs have no child to match).
           startAddon &&
-            "data-[size=sm]:*:data-[slot=autocomplete-input]:ps-[calc(--spacing(7.5)-1px)] *:data-[slot=autocomplete-input]:ps-[calc(--spacing(8.5)-1px)] sm:data-[size=sm]:*:data-[slot=autocomplete-input]:ps-[calc(--spacing(7)-1px)] sm:*:data-[slot=autocomplete-input]:ps-[calc(--spacing(8)-1px)]",
+            "data-[size=sm]:ps-[calc(--spacing(7.5)-1px)] ps-[calc(--spacing(8.5)-1px)] sm:data-[size=sm]:ps-[calc(--spacing(7)-1px)] sm:ps-[calc(--spacing(8)-1px)]",
           sizeValue === "sm"
-            ? "has-[+[data-slot=autocomplete-trigger],+[data-slot=autocomplete-clear]]:*:data-[slot=autocomplete-input]:pe-6.5"
-            : "has-[+[data-slot=autocomplete-trigger],+[data-slot=autocomplete-clear]]:*:data-[slot=autocomplete-input]:pe-7",
+            ? "has-[+[data-slot=autocomplete-trigger],+[data-slot=autocomplete-clear]]:pe-6.5"
+            : "has-[+[data-slot=autocomplete-trigger],+[data-slot=autocomplete-clear]]:pe-7",
           className,
         )}
         data-slot="autocomplete-input"
@@ -90,6 +99,8 @@ function AutocompletePopup({
   alignOffset,
   align = "start",
   anchor,
+  positionMethod = "fixed",
+  collisionAvoidance = autocompletePopupCollisionAvoidance,
   ...props
 }: AutocompletePrimitive.Popup.Props & {
   align?: AutocompletePrimitive.Positioner.Props["align"];
@@ -97,6 +108,8 @@ function AutocompletePopup({
   alignOffset?: AutocompletePrimitive.Positioner.Props["alignOffset"];
   side?: AutocompletePrimitive.Positioner.Props["side"];
   anchor?: AutocompletePrimitive.Positioner.Props["anchor"];
+  positionMethod?: AutocompletePrimitive.Positioner.Props["positionMethod"];
+  collisionAvoidance?: AutocompletePrimitive.Positioner.Props["collisionAvoidance"];
 }) {
   return (
     <AutocompletePrimitive.Portal>
@@ -105,18 +118,20 @@ function AutocompletePopup({
         alignOffset={alignOffset}
         anchor={anchor}
         className="z-50 select-none"
+        collisionAvoidance={collisionAvoidance}
         data-slot="autocomplete-positioner"
+        positionMethod={positionMethod}
         side={side}
         sideOffset={sideOffset}
       >
         <span
           className={cn(
-            "relative flex max-h-full min-w-(--anchor-width) max-w-(--available-width) origin-(--transform-origin) rounded-lg border bg-popover not-dark:bg-clip-padding shadow-lg/5 transition-[scale,opacity] before:pointer-events-none before:absolute before:inset-0 before:rounded-[calc(var(--radius-lg)-1px)] before:shadow-[0_1px_--theme(--color-black/4%)] dark:before:shadow-[0_-1px_--theme(--color-white/6%)]",
+            "relative flex max-h-full min-h-0 min-w-(--anchor-width) max-w-(--available-width) origin-(--transform-origin) rounded-lg border bg-popover not-dark:bg-clip-padding shadow-lg/5 transition-[scale,opacity] before:pointer-events-none before:absolute before:inset-0 before:rounded-[calc(var(--radius-lg)-1px)] before:shadow-[0_1px_--theme(--color-black/4%)] dark:before:shadow-[0_-1px_--theme(--color-white/6%)]",
             className,
           )}
         >
           <AutocompletePrimitive.Popup
-            className="flex max-h-[min(var(--available-height),23rem)] flex-1 flex-col text-foreground"
+            className="flex max-h-[min(var(--available-height),23rem)] min-h-0 min-w-0 flex-1 flex-col overflow-hidden text-foreground"
             data-slot="autocomplete-popup"
             {...props}
           >
@@ -136,7 +151,7 @@ function AutocompleteItem({
   return (
     <AutocompletePrimitive.Item
       className={cn(
-        "flex min-h-8 cursor-default select-none items-center rounded-sm px-2 py-1 text-base outline-none data-disabled:pointer-events-none data-highlighted:bg-accent data-highlighted:text-accent-foreground data-disabled:opacity-64 sm:min-h-7 sm:text-sm",
+        "flex min-h-8 min-w-0 cursor-default select-none items-center rounded-sm px-2 py-1 text-base outline-none data-disabled:pointer-events-none data-highlighted:bg-accent data-highlighted:text-accent-foreground data-disabled:opacity-64 sm:min-h-7 sm:text-sm",
         className,
       )}
       data-slot="autocomplete-item"
@@ -166,7 +181,7 @@ function AutocompleteGroup({
 }: AutocompletePrimitive.Group.Props) {
   return (
     <AutocompletePrimitive.Group
-      className={cn("[[role=group]+&]:mt-1.5", className)}
+      className={cn("min-w-0 [[role=group]+&]:mt-1.5", className)}
       data-slot="autocomplete-group"
       {...props}
     />
@@ -229,7 +244,7 @@ function AutocompleteList({
   ...props
 }: AutocompletePrimitive.List.Props) {
   return (
-    <ScrollArea>
+    <ScrollArea className="min-h-0 min-w-0 flex-1">
       <AutocompletePrimitive.List
         className={cn(
           "not-empty:scroll-py-1 not-empty:p-1 in-data-has-overflow-y:pe-3",

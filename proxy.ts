@@ -8,8 +8,7 @@ import { NextResponse } from "next/server";
 const isSignInPage = createRouteMatcher(["/login", "/signup"]);
 const isProtectedRoute = createRouteMatcher(["/protected(.*)"]);
 const isProtectedApiRoute = createRouteMatcher(["/api(.*)"]);
-// Temporarily
-const isPublicApiRoute = createRouteMatcher([]);
+const isPublicApiRoute = createRouteMatcher(["/api/polymarket/events"]);
 
 export const proxy = convexAuthNextjsMiddleware(
   async (request, { convexAuth }) => {

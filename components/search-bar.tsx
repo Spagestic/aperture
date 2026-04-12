@@ -11,110 +11,85 @@ import {
   AutocompleteItem,
   AutocompleteList,
   AutocompletePopup,
-  AutocompleteStatus,
-  useAutocompleteFilter,
 } from "@/components/ui/autocomplete";
 import { Spinner } from "@/components/ui/spinner";
 import {
   BadgeDollarSignIcon,
   CalendarDaysIcon,
   ClockIcon,
+  SearchIcon,
   SparklesIcon,
   TrendingUpIcon,
 } from "lucide-react";
-import { getEvents, type EventItem } from "@/lib/polymarket-events";
-import { InputGroup, InputGroupAddon } from "./ui/input-group";
-
-type SearchEvent = EventItem & { searchText: string };
-
-function buildSearchText(event: EventItem) {
-  const marketText = (event.markets ?? [])
-    .flatMap((market) => [market.question, market.id])
-    .filter(Boolean)
-    .join(" ");
-
-  return [event.title, event.category, event.slug, marketText]
-    .filter(Boolean)
-    .join(" ")
-    .toLowerCase();
-}
+import type { EventItem } from "@/lib/polymarket-events";
+import { InputGroup } from "./ui/input-group";
 
 export function Searchbar() {
   const router = useRouter();
   const [open, setOpen] = React.useState(false);
   const [value, setValue] = React.useState("");
-  const [items, setItems] = React.useState<SearchEvent[]>([]);
+  const [items, setItems] = React.useState<EventItem[]>([]);
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
-
-  const { contains } = useAutocompleteFilter({ sensitivity: "base" });
+  const query = value.trim();
 
   React.useEffect(() => {
     if (!open) return;
+    if (!query) {
+      setLoading(false);
+      setError(null);
+      setItems([]);
+      return;
+    }
 
-    let ignore = false;
-    setLoading(true);
-    setError(null);
+    const controller = new AbortController();
+    const timeoutId = window.setTimeout(() => {
+      setLoading(true);
+      setError(null);
 
-    const timeoutId = setTimeout(async () => {
-      try {
-        const events = await getEvents();
-        if (ignore) return;
+      void (async () => {
+        try {
+          const params = new URLSearchParams({
+            q: query,
+            limit: "12",
+          });
+          const response = await fetch(`/api/polymarket/events?${params}`, {
+            signal: controller.signal,
+          });
 
-        const normalizedQuery = value.trim();
-        const results = events
-          .map((event) => ({ ...event, searchText: buildSearchText(event) }))
-          .filter((event) => {
-            if (!normalizedQuery) return true;
-            return contains(event.searchText, normalizedQuery);
-          })
-          .slice(0, 12);
+          if (!response.ok) {
+            const payload = (await response.json().catch(() => null)) as {
+              error?: string;
+            } | null;
 
-        setItems(results);
-      } catch {
-        if (!ignore) {
-          setError("Failed to load Polymarket events.");
+            throw new Error(
+              payload?.error || "Failed to load Polymarket events.",
+            );
+          }
+
+          const nextItems = (await response.json()) as EventItem[];
+          setItems(nextItems);
+        } catch (fetchError) {
+          if (controller.signal.aborted) return;
+          setError(
+            fetchError instanceof Error
+              ? fetchError.message
+              : "Failed to load Polymarket events.",
+          );
           setItems([]);
+        } finally {
+          if (!controller.signal.aborted) {
+            setLoading(false);
+          }
         }
-      } finally {
-        if (!ignore) setLoading(false);
-      }
+      })();
     }, 250);
 
     return () => {
-      ignore = true;
-      clearTimeout(timeoutId);
+      window.clearTimeout(timeoutId);
+      controller.abort();
     };
-  }, [contains, open, value]);
-
-  const status = React.useMemo(() => {
-    if (loading) {
-      return (
-        <span className="flex items-center justify-between gap-2 text-muted-foreground">
-          Searching Polymarket events...
-          <Spinner className="size-4.5 sm:size-4" />
-        </span>
-      );
-    }
-
-    if (error) {
-      return <span className="text-sm text-destructive">{error}</span>;
-    }
-
-    if (!value.trim()) {
-      return (
-        <span className="text-sm text-muted-foreground">
-          Search events by title, category, slug, or market question.
-        </span>
-      );
-    }
-
-    return (
-      <span className="text-sm text-muted-foreground">
-        {items.length} result{items.length === 1 ? "" : "s"} found
-      </span>
-    );
-  }, [error, items.length, loading, value]);
+  }, [open, query]);
 
   const handleOpenChange = React.useCallback((nextOpen: boolean) => {
     setOpen(nextOpen);
@@ -122,10 +97,11 @@ export function Searchbar() {
   }, []);
 
   const handleSelect = React.useCallback(
-    (event: SearchEvent) => {
+    (event: EventItem) => {
       const slug = event.slug || event.id;
       setOpen(false);
       setValue("");
+      setItems([]);
       router.push(`/event/${slug}`);
     },
     [router],
@@ -141,11 +117,11 @@ export function Searchbar() {
   }, []);
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex w-full max-w-xl flex-col gap-4">
       <Autocomplete
         filter={null}
         items={items}
-        itemToStringValue={(item: unknown) => (item as SearchEvent).title || ""}
+        itemToStringValue={(item: unknown) => (item as EventItem).title || ""}
         onValueChange={handleQueryChange}
         open={open}
         value={value}
@@ -156,21 +132,20 @@ export function Searchbar() {
             placeholder="Search Polymarket events, markets, outcomes..."
             onFocus={handleQueryFocus}
             className="border-0 bg-transparent shadow-none focus-visible:ring-0"
+            startAddon={<SearchIcon />}
           />
-          <InputGroupAddon align="inline-end">
-            {loading ? <Spinner className="size-4" /> : null}
-          </InputGroupAddon>
         </InputGroup>
-        <AutocompletePopup
-          aria-busy={loading || undefined}
-          className="w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg"
-        >
-          <div className="border-b border-border/60 px-3 pb-2 pt-1">
-            <AutocompleteStatus className="px-0 py-0 text-muted-foreground">
-              {status}
-            </AutocompleteStatus>
-          </div>
+        <AutocompletePopup aria-busy={loading || undefined} className="w-full">
           <AutocompleteList className="max-h-[70vh]">
+            {query && loading ? (
+              <div className="flex items-center gap-2 px-3 py-2 text-muted-foreground text-sm">
+                <Spinner className="size-4 shrink-0" />
+                Searching…
+              </div>
+            ) : null}
+            {query && error ? (
+              <div className="px-3 py-2 text-destructive text-sm">{error}</div>
+            ) : null}
             {!value.trim() ? (
               <AutocompleteGroup>
                 <AutocompleteGroupLabel>Browse by topic</AutocompleteGroupLabel>
@@ -197,6 +172,7 @@ export function Searchbar() {
                     key={label}
                     value={presetQuery}
                     className="rounded-lg border border-border/60 bg-card"
+                    onSelect={() => handleQueryChange(presetQuery)}
                   >
                     <Icon className="mr-2 size-4 text-muted-foreground" />
                     {label}
@@ -205,46 +181,68 @@ export function Searchbar() {
               </AutocompleteGroup>
             ) : null}
 
-            <AutocompleteEmpty className="px-3 py-6">
-              No matching Polymarket events found.
-            </AutocompleteEmpty>
+            {query ? (
+              <>
+                {!loading && !error ? (
+                  <AutocompleteEmpty>
+                    No matching Polymarket events found.
+                  </AutocompleteEmpty>
+                ) : null}
 
-            <AutocompleteGroup>
-              <AutocompleteGroupLabel>Events</AutocompleteGroupLabel>
-              {items.map((event) => {
-                const totalMarkets = event.markets?.length ?? 0;
-                return (
-                  <AutocompleteItem
-                    key={event.id}
-                    value={event}
-                    className="rounded-xl border border-border/60 bg-card p-3"
-                    onSelect={() => handleSelect(event)}
-                  >
-                    <div className="flex w-full items-start gap-3">
-                      <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-muted text-lg">
-                        {event.icon || "🎯"}
-                      </div>
-                      <div className="min-w-0 flex-1 space-y-1">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <span className="truncate font-medium text-sm">
-                            {event.title || "Untitled event"}
-                          </span>
-                          {event.category ? (
-                            <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] uppercase tracking-wide text-muted-foreground">
-                              {event.category}
-                            </span>
-                          ) : null}
+                <AutocompleteGroup>
+                  <AutocompleteGroupLabel>Events</AutocompleteGroupLabel>
+                  {items.map((event) => {
+                    const totalMarkets = event.markets?.length ?? 0;
+                    const iconUrl =
+                      typeof event.icon === "string" &&
+                      /^https?:\/\//.test(event.icon)
+                        ? event.icon
+                        : null;
+                    return (
+                      <AutocompleteItem
+                        key={event.id}
+                        value={event}
+                        className="rounded-md bg-card p-3"
+                        onSelect={() => handleSelect(event)}
+                      >
+                        <div className="flex w-full items-start gap-3">
+                          <div className="flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-muted text-lg">
+                            {iconUrl ? (
+                              // eslint-disable-next-line @next/next/no-img-element
+                              <img
+                                src={iconUrl}
+                                alt=""
+                                className="h-full w-full object-cover"
+                              />
+                            ) : (
+                              <span>{event.icon || "🎯"}</span>
+                            )}
+                          </div>
+                          <div className="min-w-0 flex-1 space-y-1">
+                            <div className="flex flex-wrap items-center gap-2">
+                              <span className="truncate font-medium text-sm">
+                                {event.title || "Untitled event"}
+                              </span>
+                              {event.category ? (
+                                <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] uppercase tracking-wide text-muted-foreground">
+                                  {event.category}
+                                </span>
+                              ) : null}
+                            </div>
+                            <p className="truncate text-xs text-muted-foreground">
+                              {event.slug || event.id}
+                              {totalMarkets > 0
+                                ? ` · ${totalMarkets} markets`
+                                : ""}
+                            </p>
+                          </div>
                         </div>
-                        <p className="truncate text-xs text-muted-foreground">
-                          {event.slug || event.id}
-                          {totalMarkets > 0 ? ` · ${totalMarkets} markets` : ""}
-                        </p>
-                      </div>
-                    </div>
-                  </AutocompleteItem>
-                );
-              })}
-            </AutocompleteGroup>
+                      </AutocompleteItem>
+                    );
+                  })}
+                </AutocompleteGroup>
+              </>
+            ) : null}
           </AutocompleteList>
         </AutocompletePopup>
       </Autocomplete>

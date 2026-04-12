@@ -54,6 +54,18 @@ export async function getEvents(): Promise<EventItem[]> {
   return [];
 }
 
+export function buildEventSearchText(event: EventItem) {
+  const marketText = (event.markets ?? [])
+    .flatMap((market) => [market.question, market.id])
+    .filter(Boolean)
+    .join(" ");
+
+  return [event.title, event.category, event.slug, marketText]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
+}
+
 export function formatMoney(value?: string | number) {
   const num = Number(value ?? 0);
   if (Number.isNaN(num)) return "$0";
