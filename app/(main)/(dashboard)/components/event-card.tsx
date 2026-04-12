@@ -14,7 +14,7 @@ import {
   type EventItem,
 } from "@/lib/polymarket-events";
 
-export function PolymarketEventCard({ event }: { event: EventItem }) {
+export function EventCard({ event }: { event: EventItem }) {
   const cover = event.image || event.icon;
   const slug = event.slug || event.id;
 
