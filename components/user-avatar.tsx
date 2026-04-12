@@ -19,7 +19,6 @@ import Link from "next/link";
 export function UserAvatar({ className }: { className?: string }) {
   const router = useRouter();
   const user = useQuery(api.users.getCurrentUser);
-  console.log("Current user:", user);
   const { signOut } = useAuthActions();
 
   return (
