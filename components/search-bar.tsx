@@ -34,7 +34,6 @@ export function Searchbar() {
   const query = value.trim();
 
   React.useEffect(() => {
-    if (!open) return;
     if (!query) {
       setLoading(false);
       setError(null);
@@ -89,11 +88,10 @@ export function Searchbar() {
       window.clearTimeout(timeoutId);
       controller.abort();
     };
-  }, [open, query]);
+  }, [query]);
 
   const handleOpenChange = React.useCallback((nextOpen: boolean) => {
     setOpen(nextOpen);
-    if (!nextOpen) setValue("");
   }, []);
 
   const handleSelect = React.useCallback(
@@ -121,7 +119,11 @@ export function Searchbar() {
       <Autocomplete
         filter={null}
         items={items}
-        itemToStringValue={(item: unknown) => (item as EventItem).title || ""}
+        itemToStringValue={(item: unknown) =>
+          typeof item === "string"
+            ? item
+            : ((item as EventItem).title || "")
+        }
         onValueChange={handleQueryChange}
         open={open}
         value={value}
@@ -129,7 +131,7 @@ export function Searchbar() {
       >
         <InputGroup>
           <AutocompleteInput
-            placeholder="Search Polymarket events, markets, outcomes..."
+            placeholder="Search Polymarket events..."
             onFocus={handleQueryFocus}
             className="border-0 bg-transparent shadow-none focus-visible:ring-0"
             startAddon={<SearchIcon />}
@@ -172,7 +174,10 @@ export function Searchbar() {
                     key={label}
                     value={presetQuery}
                     className="rounded-lg border border-border/60 bg-card"
-                    onSelect={() => handleQueryChange(presetQuery)}
+                    onSelect={() => {
+                      handleQueryChange(presetQuery);
+                      queueMicrotask(() => setOpen(true));
+                    }}
                   >
                     <Icon className="mr-2 size-4 text-muted-foreground" />
                     {label}
@@ -191,7 +196,6 @@ export function Searchbar() {
 
                 {!loading && !error && items.length > 0 ? (
                   <AutocompleteGroup>
-                    <AutocompleteGroupLabel>Events</AutocompleteGroupLabel>
                     {items.map((event) => {
                       const totalMarkets = event.markets?.length ?? 0;
                       const iconUrl =
