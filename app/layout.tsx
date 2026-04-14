@@ -5,8 +5,8 @@ import "streamdown/styles.css";
 import { ConvexAuthNextjsServerProvider } from "@convex-dev/auth/nextjs/server";
 import ConvexClientProvider from "@/components/ConvexClientProvider";
 import { ThemeProvider } from "@/components/theme-provider";
-import { Suspense } from "react";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
+import { Suspense } from "react";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -37,20 +37,20 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <Suspense fallback={null}>
-          <ConvexAuthNextjsServerProvider>
-            <ThemeProvider
-              attribute="class"
-              defaultTheme="system"
-              enableSystem
-              disableTransitionOnChange
-            >
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <Suspense fallback={null}>
+            <ConvexAuthNextjsServerProvider>
               <ConvexClientProvider>
                 <NuqsAdapter>{children} </NuqsAdapter>
               </ConvexClientProvider>
-            </ThemeProvider>
-          </ConvexAuthNextjsServerProvider>
-        </Suspense>
+            </ConvexAuthNextjsServerProvider>
+          </Suspense>
+        </ThemeProvider>
       </body>
     </html>
   );
