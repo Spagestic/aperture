@@ -1,19 +1,25 @@
-import { streamText, UIMessage, convertToModelMessages, stepCountIs } from "ai";
-import { scrape, search, browser } from "firecrawl-aisdk";
+import { convertToModelMessages, stepCountIs, streamText, UIMessage } from "ai";
+import { mistral } from "@ai-sdk/mistral";
+import { search, scrape, batchScrape, poll } from "firecrawl-aisdk";
 
 export async function POST(req: Request) {
   const { messages }: { messages: UIMessage[] } = await req.json();
 
   const result = streamText({
-    model: "mistral/mistral-large-3",
+    model: mistral("mistral-small-2603"),
     messages: await convertToModelMessages(messages),
+    system: `You are a helpful research assistant. The current date is ${new Date().toLocaleDateString()}. When answering questions based on search results, scrape multiple URLs if necessary to ensure your answer is comprehensive and accurate.`,
     tools: {
       search: search,
       scrape: scrape,
-      browser: browser(),
+      batchScrape: batchScrape,
+      poll: poll,
     },
-    stopWhen: stepCountIs(6),
+    // toolChoice: "required", // Force tool calls at every step
+    stopWhen: stepCountIs(20),
   });
 
-  return result.toUIMessageStreamResponse();
+  return result.toUIMessageStreamResponse({
+    sendReasoning: true,
+  });
 }
