@@ -21,6 +21,34 @@ export type EventItem = {
   markets?: Market[];
 };
 
+export type PolymarketEvent = EventItem & {
+  subtitle?: string;
+  description?: string;
+  resolutionSource?: string;
+  startDate?: string;
+  creationDate?: string;
+  endDate?: string;
+  active?: boolean;
+  closed?: boolean;
+  archived?: boolean;
+  featured?: boolean;
+  restricted?: boolean;
+  liquidity?: number | string;
+  volume?: number | string;
+  openInterest?: number | string;
+  category?: string;
+  subcategory?: string;
+  image?: string;
+  icon?: string;
+  commentsEnabled?: boolean;
+  markets?: Market[];
+  tags?: Array<{ id?: string; label?: string; slug?: string }>;
+  categories?: Array<{ id?: string; label?: string; slug?: string }>;
+  published_at?: string;
+  createdAt?: string;
+  updatedAt?: string;
+};
+
 export type TopOutcome = {
   name: string;
   probability: string;
@@ -70,6 +98,43 @@ export async function getEventsPage(
 
 export async function getEvents(): Promise<EventItem[]> {
   return getEventsPage({ offset: 0, limit: DEFAULT_EVENTS_LIMIT });
+}
+
+export async function getEventBySlug(
+  slug: string,
+  options?: {
+    includeChat?: boolean;
+    includeTemplate?: boolean;
+  },
+  init?: RequestInit,
+): Promise<PolymarketEvent | null> {
+  const normalizedSlug = slug.trim();
+  if (!normalizedSlug) return null;
+
+  const params = new URLSearchParams();
+  if (options?.includeChat) params.set("include_chat", "true");
+  if (options?.includeTemplate) params.set("include_template", "true");
+
+  const query = params.toString();
+  const url = `https://gamma-api.polymarket.com/events/slug/${encodeURIComponent(normalizedSlug)}${query ? `?${query}` : ""}`;
+  const res = await fetch(url, {
+    headers: { Accept: "application/json" },
+    ...init,
+    cache: "no-store",
+  });
+
+  if (res.status === 404) {
+    return null;
+  }
+
+  if (!res.ok) {
+    const body = await res.text().catch(() => "");
+    throw new Error(
+      `Failed to fetch Polymarket event (${res.status}): ${body || res.statusText}`,
+    );
+  }
+
+  return (await res.json()) as PolymarketEvent;
 }
 
 type GammaPublicSearchResponse = {
