@@ -178,14 +178,13 @@ export default async function EventPage({ params }: EventPageProps) {
                       {formatDate(event.endDate)}
                     </p>
                   </div>
-                  <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                  <div className="grid gap-3 sm:grid-cols-3 ">
                     <Stat label="24h volume" value={totalVolume} />
                     <Stat label="Liquidity" value={totalLiquidity} />
                     <Stat
                       label="Open interest"
                       value={formatMoney(event.openInterest)}
                     />
-                    <InfoPanel title="Markets" body={`${totalMarkets} total`} />
                   </div>
                 </div>
               </div>
@@ -197,15 +196,15 @@ export default async function EventPage({ params }: EventPageProps) {
             </CardContent>
           </Card>
 
-          <div>
+          <div className="min-w-0 overflow-x-hidden">
             {markets.length > 0 ? (
-              <div className="grid gap-4 lg:grid-cols-2">
+              <div className="grid min-w-0 gap-4 lg:grid-cols-2">
                 {markets.map((market, index) => {
                   const outcome = topOutcome(market);
                   return (
                     <div
                       key={market.id}
-                      className="rounded-lg border border-border/60 bg-muted/30 p-4"
+                      className="min-w-0 overflow-hidden rounded-lg border border-border/60 bg-muted/30 p-4"
                     >
                       <div className="flex min-w-0 items-start justify-between gap-3">
                         <div className="min-w-0">
@@ -310,7 +309,9 @@ function SummaryRow({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex items-start justify-between gap-4">
       <span className="text-muted-foreground">{label}</span>
-      <span className="text-right font-medium">{value}</span>
+      <span className="min-w-0 wrap-break-word text-right font-medium">
+        {value}
+      </span>
     </div>
   );
 }
