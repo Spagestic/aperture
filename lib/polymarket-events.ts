@@ -3,8 +3,21 @@ export type Market = {
   question?: string;
   outcomes?: string[] | string;
   outcomePrices?: string[] | string;
+  startDate?: string;
+  endDate?: string;
+  volume?: number | string;
   volume24hr?: number | string;
   liquidity?: number | string;
+  liquidityNum?: number | string;
+  volumeNum?: number | string;
+  lastTradePrice?: number | string;
+  bestBid?: number | string;
+  bestAsk?: number | string;
+  spread?: number | string;
+  active?: boolean;
+  closed?: boolean;
+  archived?: boolean;
+  restricted?: boolean;
 };
 
 export type EventItem = {
@@ -12,13 +25,28 @@ export type EventItem = {
   title?: string;
   slug?: string;
   category?: string;
+  subtitle?: string;
+  description?: string;
+  resolutionSource?: string;
+  startDate?: string;
+  creationDate?: string;
+  endDate?: string;
+  active?: boolean;
+  closed?: boolean;
+  archived?: boolean;
+  featured?: boolean;
+  restricted?: boolean;
   volume24hr?: number | string;
   liquidity?: number | string;
-  startDate?: string;
-  endDate?: string;
   image?: string;
   icon?: string;
   markets?: Market[];
+  openInterest?: number | string;
+  volume?: number | string;
+  tags?: Array<{ id?: string; label?: string; slug?: string }>;
+  categories?: Array<{ id?: string; label?: string; slug?: string }>;
+  createdAt?: string;
+  updatedAt?: string;
 };
 
 export type PolymarketEvent = EventItem & {
