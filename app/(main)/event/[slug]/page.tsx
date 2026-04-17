@@ -3,13 +3,11 @@ import { notFound } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
 import {
   formatDate,
   formatMoney,
   getEvents,
   getEventBySlug,
-  parseArray,
   topOutcome,
   type EventItem,
   type Market,
@@ -43,6 +41,12 @@ async function resolveEvent(slug: string) {
 
 function marketCardTitle(market: Market, index: number) {
   return market.question || `Market ${index + 1}`;
+}
+
+function formatRate(value?: number | string) {
+  const num = Number(value ?? Number.NaN);
+  if (Number.isNaN(num)) return "N/A";
+  return `${Math.round(num * 100)}%`;
 }
 
 function buildAnalyzePrompt(event: EventItem, markets: Market[]) {
@@ -87,21 +91,24 @@ export default async function EventPage({ params }: EventPageProps) {
 
   const cover = event.image || event.icon;
   const markets = event.markets ?? [];
-  const primaryMarket = markets[0];
-  const leadOutcome = topOutcome(primaryMarket);
   const totalMarkets = markets.length;
   const totalLiquidity = formatMoney(event.liquidity);
   const totalVolume = formatMoney(event.volume24hr);
   const analyzePrompt = buildAnalyzePrompt(event, markets);
-  const categories = Array.from(
-    new Set(parseArray(event.category ? [event.category] : [])),
-  );
+  const tags = event.tags ?? [];
+  const eventStatus = [
+    event.active ? "Active" : null,
+    event.closed ? "Closed" : null,
+    event.archived ? "Archived" : null,
+    event.featured ? "Featured" : null,
+    event.restricted ? "Restricted" : null,
+  ].filter(Boolean) as string[];
 
   return (
     <div className="min-h-screen p-4 sm:p-6 lg:p-8">
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-6">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="flex items-center gap-2">
+          <div className="flex w-full items-center justify-between gap-2">
             <Button asChild variant="outline" className="shrink-0">
               <Link href="/">Back to events</Link>
             </Button>
@@ -116,144 +123,160 @@ export default async function EventPage({ params }: EventPageProps) {
               </Link>
             </Button>
           </div>
-          <div className="text-sm text-muted-foreground">
-            {totalMarkets} market{totalMarkets === 1 ? "" : "s"} · {totalVolume}{" "}
-            24h volume · {totalLiquidity} liquidity
-          </div>
         </div>
 
-        <section className="grid gap-6 xl:grid-cols-[1.6fr_0.9fr]">
-          <Card className="overflow-hidden border-border/60 bg-card/80 shadow-sm backdrop-blur">
-            <div className="h-44 w-full bg-muted sm:h-56">
-              {cover ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={cover}
-                  alt={event.title || "Polymarket event cover"}
-                  className="h-full w-full object-cover"
-                />
-              ) : (
-                <div className="flex h-full w-full items-end bg-linear-to-br from-primary/35 via-primary/15 to-emerald-400/10 p-6">
-                  <div className="max-w-2xl space-y-3">
-                    <Badge variant="secondary" className="w-fit">
+        <section className="space-y-6">
+          <Card className="border-border/60 bg-card/80 shadow-sm backdrop-blur">
+            <CardContent className="space-y-5 p-5 sm:p-6">
+              <div className="grid gap-6 lg:grid-cols-[300px_1fr] lg:items-start">
+                <Card className="self-start overflow-hidden border-border/60 bg-card/80 p-0 shadow-sm backdrop-blur">
+                  {cover ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={cover}
+                      alt={event.title || "Polymarket event cover"}
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    <div className="flex h-full w-full items-end bg-linear-to-br from-primary/35 via-primary/15 to-emerald-400/10 p-5">
+                      <Badge variant="secondary" className="w-fit">
+                        {event.category || "General"}
+                      </Badge>
+                    </div>
+                  )}
+                </Card>
+                <div className="min-w-0 flex flex-col gap-4">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Badge variant="secondary">
                       {event.category || "General"}
                     </Badge>
-                    <p className="text-2xl font-semibold tracking-tight sm:text-4xl">
+                    {eventStatus.map((status) => (
+                      <Badge key={status} variant="outline">
+                        {status}
+                      </Badge>
+                    ))}
+                    {tags.slice(0, 3).map((tag) => (
+                      <Badge
+                        key={tag.id || tag.slug || tag.label}
+                        variant="outline"
+                      >
+                        {tag.label || tag.slug || "Tag"}
+                      </Badge>
+                    ))}
+                  </div>
+                  <div className="space-y-2">
+                    <h1 className="text-2xl font-semibold tracking-tight sm:text-4xl">
                       {event.title || "Untitled event"}
+                    </h1>
+                    {event.subtitle ? (
+                      <p className="text-sm text-muted-foreground sm:text-base">
+                        {event.subtitle}
+                      </p>
+                    ) : null}
+                    <p className="text-sm text-muted-foreground sm:text-base">
+                      {formatDate(event.startDate)} —{" "}
+                      {formatDate(event.endDate)}
                     </p>
                   </div>
-                </div>
-              )}
-            </div>
-
-            <CardContent className="space-y-6 p-6">
-              <div className="space-y-4">
-                <div className="flex flex-wrap items-center gap-2">
-                  <Badge variant="secondary">
-                    {event.category || "General"}
-                  </Badge>
-                  {categories.map((category) => (
-                    <Badge key={category} variant="outline">
-                      {category}
-                    </Badge>
-                  ))}
-                </div>
-
-                <div className="space-y-2">
-                  <h1 className="text-3xl font-semibold tracking-tight sm:text-5xl">
-                    {event.title || "Untitled event"}
-                  </h1>
-                  <p className="text-sm text-muted-foreground sm:text-base">
-                    {formatDate(event.startDate)} — {formatDate(event.endDate)}
-                  </p>
-                </div>
-
-                <div className="grid gap-3 sm:grid-cols-3">
-                  <Stat label="24h volume" value={totalVolume} />
-                  <Stat label="Liquidity" value={totalLiquidity} />
-                  <Stat label="Markets" value={`${totalMarkets}`} />
+                  <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                    <Stat label="24h volume" value={totalVolume} />
+                    <Stat label="Liquidity" value={totalLiquidity} />
+                    <Stat
+                      label="Open interest"
+                      value={formatMoney(event.openInterest)}
+                    />
+                    <InfoPanel title="Markets" body={`${totalMarkets} total`} />
+                  </div>
                 </div>
               </div>
-
-              <Separator />
-
-              <div className="grid gap-4 md:grid-cols-2">
-                <InfoPanel
-                  title="Primary market"
-                  body={
-                    primaryMarket?.question ||
-                    "No market data available for this event."
-                  }
-                />
-                <InfoPanel
-                  title="Top outcome"
-                  body={
-                    leadOutcome
-                      ? `${leadOutcome.name} · ${leadOutcome.probability}`
-                      : "N/A"
-                  }
-                />
-              </div>
+              {event.description ? (
+                <p className="text-sm leading-relaxed text-muted-foreground sm:text-base">
+                  {event.description}
+                </p>
+              ) : null}
             </CardContent>
           </Card>
 
-          <div className="space-y-6">
-            <Card className="border-border/60 bg-card/80 shadow-sm backdrop-blur">
-              <CardHeader>
-                <CardTitle>Markets</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {markets.length > 0 ? (
-                  markets.map((market, index) => {
-                    const outcome = topOutcome(market);
-                    return (
-                      <div
-                        key={market.id}
-                        className="space-y-2 rounded-lg border border-border/60 bg-muted/30 p-4"
-                      >
-                        <div className="flex items-start justify-between gap-3">
-                          <div className="min-w-0">
-                            <p className="font-medium leading-snug">
-                              {marketCardTitle(market, index)}
-                            </p>
-                            <p className="mt-1 text-xs text-muted-foreground">
-                              {market.id}
-                            </p>
-                          </div>
+          <div>
+            {markets.length > 0 ? (
+              <div className="grid gap-4 lg:grid-cols-2">
+                {markets.map((market, index) => {
+                  const outcome = topOutcome(market);
+                  return (
+                    <div
+                      key={market.id}
+                      className="rounded-lg border border-border/60 bg-muted/30 p-4"
+                    >
+                      <div className="flex min-w-0 items-start justify-between gap-3">
+                        <div className="min-w-0">
+                          <p className="truncate font-medium leading-snug">
+                            {marketCardTitle(market, index)}
+                          </p>
+                          <p className="mt-1 text-xs text-muted-foreground">
+                            {market.id}
+                          </p>
+                        </div>
+                        <div className="flex flex-wrap items-center justify-end gap-2">
                           <Badge variant="secondary" className="shrink-0">
                             {outcome ? outcome.probability : "N/A"}
                           </Badge>
-                        </div>
-
-                        {outcome ? (
-                          <p className="text-sm text-muted-foreground">
-                            Leading outcome:{" "}
-                            <span className="text-foreground">
-                              {outcome.name}
-                            </span>
-                          </p>
-                        ) : null}
-
-                        <div className="grid gap-2 text-sm sm:grid-cols-2">
-                          <SummaryRow
-                            label="24h volume"
-                            value={formatMoney(market.volume24hr)}
-                          />
-                          <SummaryRow
-                            label="Liquidity"
-                            value={formatMoney(market.liquidity)}
-                          />
+                          <Badge variant="outline" className="shrink-0">
+                            {outcome ? outcome.name : "N/A"}
+                          </Badge>
                         </div>
                       </div>
-                    );
-                  })
-                ) : (
-                  <p className="text-sm text-muted-foreground">
-                    No markets available.
-                  </p>
-                )}
-              </CardContent>
-            </Card>
+
+                      <div className="mt-4 grid gap-4 text-sm sm:grid-cols-2">
+                        <SummaryRow
+                          label="Volume"
+                          value={formatMoney(
+                            market.volume ?? market.volume24hr,
+                          )}
+                        />
+                        <SummaryRow
+                          label="Liquidity"
+                          value={formatMoney(market.liquidity)}
+                        />
+                        <SummaryRow
+                          label="Start date"
+                          value={formatDate(market.startDate)}
+                        />
+                        <SummaryRow
+                          label="End date"
+                          value={formatDate(market.endDate)}
+                        />
+                        <SummaryRow
+                          label="Last trade"
+                          value={formatRate(market.lastTradePrice)}
+                        />
+                        <SummaryRow
+                          label="Best bid / ask"
+                          value={`${formatRate(market.bestBid)} / ${formatRate(market.bestAsk)}`}
+                        />
+                        <SummaryRow
+                          label="Spread"
+                          value={formatRate(market.spread)}
+                        />
+                        <SummaryRow
+                          label="Status"
+                          value={
+                            market.active
+                              ? market.closed
+                                ? "Active · Closed"
+                                : "Active"
+                              : "Inactive"
+                          }
+                        />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                No markets available.
+              </p>
+            )}
           </div>
         </section>
       </div>
