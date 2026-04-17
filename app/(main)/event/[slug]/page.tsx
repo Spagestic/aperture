@@ -8,6 +8,7 @@ import {
   formatDate,
   formatMoney,
   getEvents,
+  getEventBySlug,
   parseArray,
   topOutcome,
   type EventItem,
@@ -30,14 +31,55 @@ function eventMatchesSlug(event: EventItem, slug: string) {
   return candidates.some((candidate) => normalizeSlug(candidate) === slug);
 }
 
+async function resolveEvent(slug: string) {
+  const directEvent = await getEventBySlug(slug);
+  if (directEvent) {
+    return directEvent;
+  }
+
+  const events = await getEvents();
+  return events.find((item) => eventMatchesSlug(item, slug)) ?? null;
+}
+
 function marketCardTitle(market: Market, index: number) {
   return market.question || `Market ${index + 1}`;
 }
 
+function buildAnalyzePrompt(event: EventItem, markets: Market[]) {
+  const eventUrl = event.slug
+    ? `https://polymarket.com/event/${event.slug}`
+    : "N/A";
+  const summarizedMarkets = markets.slice(0, 5).map((market, index) => {
+    const outcome = topOutcome(market);
+    return {
+      index: index + 1,
+      id: market.id,
+      question: marketCardTitle(market, index),
+      topOutcome: outcome ? `${outcome.name} (${outcome.probability})` : "N/A",
+      volume24h: formatMoney(market.volume24hr),
+      liquidity: formatMoney(market.liquidity),
+    };
+  });
+
+  return [
+    `Analyze this Polymarket event and recommend the best markets/sides to invest in:`,
+    `Event title: ${event.title || "Untitled event"}`,
+    `Event URL: ${eventUrl}`,
+    `Category: ${event.category || "General"}`,
+    `Start date: ${formatDate(event.startDate)}`,
+    `End date: ${formatDate(event.endDate)}`,
+    `Event 24h volume: ${formatMoney(event.volume24hr)}`,
+    `Event liquidity: ${formatMoney(event.liquidity)}`,
+    `Total markets: ${markets.length}`,
+    "",
+    `Top markets snapshot:`,
+    JSON.stringify(summarizedMarkets, null, 2),
+  ].join("\n");
+}
+
 export default async function EventPage({ params }: EventPageProps) {
   const { slug } = await params;
-  const events = await getEvents();
-  const event = events.find((item) => eventMatchesSlug(item, slug));
+  const event = await resolveEvent(slug);
 
   if (!event) {
     notFound();
@@ -50,6 +92,7 @@ export default async function EventPage({ params }: EventPageProps) {
   const totalMarkets = markets.length;
   const totalLiquidity = formatMoney(event.liquidity);
   const totalVolume = formatMoney(event.volume24hr);
+  const analyzePrompt = buildAnalyzePrompt(event, markets);
   const categories = Array.from(
     new Set(parseArray(event.category ? [event.category] : [])),
   );
@@ -58,18 +101,30 @@ export default async function EventPage({ params }: EventPageProps) {
     <div className="min-h-screen p-4 sm:p-6 lg:p-8">
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-6">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <Button asChild variant="outline" className="shrink-0">
-            <Link href="/">Back to events</Link>
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button asChild variant="outline" className="shrink-0">
+              <Link href="/">Back to events</Link>
+            </Button>
+            <Button asChild className="shrink-0">
+              <Link
+                href={{
+                  pathname: "/chat",
+                  query: { prompt: analyzePrompt },
+                }}
+              >
+                Analyze
+              </Link>
+            </Button>
+          </div>
           <div className="text-sm text-muted-foreground">
-            {totalMarkets} market{totalMarkets === 1 ? "" : "s"} · {totalVolume}
+            {totalMarkets} market{totalMarkets === 1 ? "" : "s"} · {totalVolume}{" "}
             24h volume · {totalLiquidity} liquidity
           </div>
         </div>
 
         <section className="grid gap-6 xl:grid-cols-[1.6fr_0.9fr]">
           <Card className="overflow-hidden border-border/60 bg-card/80 shadow-sm backdrop-blur">
-            <div className="aspect-16/8 w-full bg-muted sm:aspect-16/6">
+            <div className="h-44 w-full bg-muted sm:h-56">
               {cover ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
@@ -143,38 +198,6 @@ export default async function EventPage({ params }: EventPageProps) {
           </Card>
 
           <div className="space-y-6">
-            <Card className="border-border/60 bg-card/80 shadow-sm backdrop-blur">
-              <CardHeader>
-                <CardTitle>Event summary</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4 text-sm text-muted-foreground">
-                <p>
-                  This page surfaces the live Polymarket event detail view for
-                  the selected slug. It highlights the key market, summary
-                  metrics, and the full list of markets attached to the event.
-                </p>
-                <div className="grid gap-3 rounded-lg border border-border/60 bg-muted/40 p-4 text-foreground">
-                  <SummaryRow label="Event ID" value={event.id} />
-                  <SummaryRow
-                    label="Slug"
-                    value={event.slug || normalizeSlug(event.title)}
-                  />
-                  <SummaryRow
-                    label="Category"
-                    value={event.category || "General"}
-                  />
-                  <SummaryRow
-                    label="Start date"
-                    value={formatDate(event.startDate)}
-                  />
-                  <SummaryRow
-                    label="End date"
-                    value={formatDate(event.endDate)}
-                  />
-                </div>
-              </CardContent>
-            </Card>
-
             <Card className="border-border/60 bg-card/80 shadow-sm backdrop-blur">
               <CardHeader>
                 <CardTitle>Markets</CardTitle>
