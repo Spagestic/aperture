@@ -35,6 +35,9 @@ export const startResearch = mutation({
     args,
   ): Promise<{ runId: Id<"researchRuns">; workflowId: string }> => {
     const userId = await getAuthUserId(ctx);
+    if (!userId) {
+      throw new Error("You must be signed in to start an analysis.");
+    }
     const marketsJson = args.markets ? JSON.stringify(args.markets) : undefined;
 
     const runId: Id<"researchRuns"> = await ctx.db.insert("researchRuns", {
@@ -43,7 +46,7 @@ export const startResearch = mutation({
       eventDescription: args.eventDescription,
       eventUrl: args.eventUrl,
       eventMarketsJson: marketsJson,
-      userId: userId ?? undefined,
+      userId,
       status: "pending",
       startedAt: Date.now(),
     });
@@ -64,8 +67,15 @@ export const cancelResearch = mutation({
   args: { runId: v.id("researchRuns") },
   returns: v.null(),
   handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) {
+      throw new Error("You must be signed in to cancel an analysis.");
+    }
     const run = await ctx.db.get(args.runId);
     if (!run || !run.workflowId) return null;
+    if (run.userId && run.userId !== userId) {
+      throw new Error("You can only cancel your own analyses.");
+    }
     try {
       await workflow.cancel(
         ctx,
