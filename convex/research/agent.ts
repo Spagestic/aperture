@@ -2,7 +2,7 @@ import { mistral } from "@ai-sdk/mistral";
 import { generateObject, generateText, type LanguageModel } from "ai";
 import type { z } from "zod";
 
-export const MODEL: LanguageModel = mistral("mistral-small-2603");
+export const MODEL: LanguageModel = mistral("mistral-large-2512");
 
 export const RESEARCH_BUDGET = {
   /** Max research questions the supervisor can produce. */
@@ -28,7 +28,9 @@ export async function generateStructured<T>(args: {
     schema: args.schema,
     prompt: args.prompt,
     ...(args.system ? { system: args.system } : {}),
-    ...(args.temperature !== undefined ? { temperature: args.temperature } : {}),
+    ...(args.temperature !== undefined
+      ? { temperature: args.temperature }
+      : {}),
   });
   return result.object as T;
 }
@@ -42,7 +44,9 @@ export async function generateMarkdown(args: {
     model: MODEL,
     prompt: args.prompt,
     ...(args.system ? { system: args.system } : {}),
-    ...(args.temperature !== undefined ? { temperature: args.temperature } : {}),
+    ...(args.temperature !== undefined
+      ? { temperature: args.temperature }
+      : {}),
   });
   return result.text;
 }
