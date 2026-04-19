@@ -1,8 +1,10 @@
 # Aperture
 
-> This project was developed as a group project for **ECON3086** course at **Hong Kong Baptist University (HKBU)**.
+> This project was developed as a group project for the **ECON3086** course at **Hong Kong Baptist University (HKBU)**.
 
-Next.js frontend with a [Convex](https://convex.dev/) backend. The app combines Polymarket event pages (markets, tabs) with an optional **durable AI research workflow** that classifies an event, plans questions, searches and scrapes the open web, then writes a memo plus recommended markets.
+![Dashboard](/public/dashboard.png)
+
+Aperture is a polymarket research analysis platform. Our workflow classifies an event (speculative or researchable), plans questions, searches and scrapes the open web, then writes a memo plus recommended markets.
 
 ## Polymarket event research (Convex workflow)
 
