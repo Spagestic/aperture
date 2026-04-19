@@ -1,43 +1,74 @@
 # Aperture
 
+Next.js frontend with a [Convex](https://convex.dev/) backend. The app combines Polymarket event pages (markets, tabs) with an optional **durable AI research workflow** that classifies an event, plans questions, searches and scrapes the open web, then writes a memo plus recommended markets.
+
+## Polymarket event research (Convex workflow)
+
+Research runs entirely in Convex using **`@convex-dev/workflow`** (durable steps and retries) and **`@convex-dev/agent`** with **Mistral** for structured LLM calls. **Firecrawl** powers web search and scraping via existing Convex actions.
+
 ```mermaid
 flowchart TD
-    START([START])
-    --> A[ingest_event<br/>Fetch market metadata]
-    --> B[speculative_filter<br/>Speculative check?]
+  UI["Event page · Analyze tab"] -->|startResearch mutation| Run["Create researchRuns · schedule kickoff"]
+  Run --> WF["workflow: researchEvent"]
+  WF --> C["classifySpeculative"]
+  C -->|speculative| Stop["status: stopped_speculative"]
+  C -->|researchable| P["planQuestions · insert researchQuestions"]
+  P --> Fan["Promise.all · runSubagent per question"]
+  Fan --> Sub["Subagent loop: search → judge URLs → scrape → summarize + relevance"]
+  Sub -->|per question| Q["consolidatedSummary on researchQuestions"]
+  Fan --> M["pickMarkets → researchMarketPicks"]
+  M --> F["synthesizeFinal → researchRuns.finalReport"]
+  F --> Done["status: completed"]
 
-    B -->|Speculative| Z[end_with_message<br/>Return explanation]
-    B -->|Researchable| C[supervisor_plan<br/>Plan research questions]
-
-    C --> D[dispatch_tasks<br/>Parallel execution]
-
-    D --> E1[general_researcher]
-    D --> E2[news_flow_agent]
-    D --> E3[data_agent]
-
-    E1 & E2 & E3 --> F[handle_meta_questions<br/>Spawn follow-ups?]
-
-    F -->|New questions| D
-    F -->|Done| G[aggregation_agent<br/>Synthesize + probabilities]
-    G --> H[format_output<br/>Markdown / JSON report]
-    H --> END([END])
-
-    style START fill:#1e40af, color:white
-    style END fill:#1e40af, color:white
-    style B fill:#4338ca, color:white
-    style F fill:#4338ca, color:white
-    style Z fill:#991b1b, color:white
+  style Stop fill:#78350f,color:#fff
+  style Done fill:#14532d,color:#fff
 ```
 
-## 🚀 Getting Started
+**Why this shape:** Workflow gives durable execution without rebuilding orchestration in LangGraph for this path. Agent threads persist LLM context for debugging and future features. The UI subscribes with `useQuery` to `researchRuns`, `researchQuestions`, sources, picks, and optional `researchLogs`—no SSE route required.
+
+### Data model (Convex)
+
+| Table | Purpose |
+| --- | --- |
+| `researchRuns` | One run per kickoff: `eventSlug`, status lifecycle, `speculativeReason`, `finalReport`, `errorMessage`, timestamps |
+| `researchQuestions` | Planned questions with status (`pending` → `searching` / `scraping` / `summarizing` → `done` / `failed`), `iteration`, `consolidatedSummary` |
+| `researchSearchResults` | Firecrawl search hits per question/iteration with scrape `decision` |
+| `researchSources` | Scraped pages: URL, summary, `relevant`, `relevanceReason` |
+| `researchMarketPicks` | Recommended market id, `side` (YES / NO / AVOID / WATCH), conviction, rationale, key risk |
+| `researchLogs` | Debug feed: `phase`, `level`, `message` |
+
+Indexes favor listing by `runId` / `questionId` for reactive queries.
+
+### Code map
+
+| Area | Location |
+| --- | --- |
+| Workflow definition | `convex/research/workflow.ts` |
+| Classify + plan steps | `convex/research/steps.ts` |
+| Per-question subagent loop | `convex/research/worker.ts` |
+| Market pick + final memo | `convex/research/synthesize.ts` |
+| Public API (mutations/queries) | `convex/research/api.ts`, `convex/research/queries.ts` |
+| Convex components | `convex/convex.config.ts` registers `workflow` + `agent` |
+| Analyze UI | `app/(main)/event/[slug]/_components/analyze-panel/` |
+
+Authenticated users start a run from the **Analyze** tab; progress, sources, picks, and the markdown memo update live.
+
+### Convex environment (server)
+
+Set secrets in the Convex dashboard (or `npx convex env set`) so actions can call providers:
+
+- `MISTRAL_API_KEY`
+- `FIRECRAWL_API_KEY`
+
+---
+
+## Getting started
 
 ### Prerequisites
 
-Make sure you have:
-
 - [Bun](https://bun.sh/)
-- a [Convex account](https://convex.dev/)
-- API keys for the services you want to enable
+- A [Convex](https://convex.dev/) project
+- API keys for the features you enable (see `.env.example`)
 
 ### Installation
 
@@ -54,16 +85,15 @@ Make sure you have:
    bun install
    ```
 
-3. **Set up environment variables**
+3. **Environment variables**
 
    ```bash
    cp .env.example .env.local
    ```
 
-4. **Add your environment variables**
+   Fill in at least:
 
    ```env
-   CONVEX_DEPLOYMENT=<your-convex-deployment>
    NEXT_PUBLIC_CONVEX_URL=<your-convex-url>
    NEXT_PUBLIC_CONVEX_SITE_URL=<your-convex-site-url>
 
@@ -71,20 +101,28 @@ Make sure you have:
    FIRECRAWL_API_KEY=<your-firecrawl-key>
    ```
 
-5. **Initialize Convex Auth**
+   For production/preview deploys, also configure `CONVEX_DEPLOY_KEY` as described in `.env.example`.
+
+4. **Convex Auth (first-time)**
 
    ```bash
    npx @convex-dev/auth
    ```
 
-6. **Run the development server**
+5. **Run the app**
 
    ```bash
    bun run dev
    ```
 
-7. **Open the app**
+6. **Open the app**
 
-   Visit: [http://localhost:3000](http://localhost:3000)
+   [http://localhost:3000](http://localhost:3000)
+
+The `predev` script runs Convex setup hooks; see `package.json` for `dev` / `dev:frontend` / `dev:backend` split.
 
 ---
+
+## Other features
+
+The same repo includes Convex-backed **companies**, **documents**, discovery jobs, and dashboard integrations (e.g. optional Finnhub / Alpha Vantage keys in `.env.example`). Those paths are separate from the Polymarket research tables above.
