@@ -12,20 +12,59 @@ Research runs entirely in Convex using **`@convex-dev/workflow`** (durable steps
 
 ```mermaid
 flowchart TD
-  UI["Event page · Analyze tab"] -->|startResearch mutation| Run["Create researchRuns · schedule kickoff"]
-  Run --> WF["workflow: researchEvent"]
-  WF --> C["classifySpeculative"]
-  C -->|speculative| Stop["status: stopped_speculative"]
-  C -->|researchable| P["planQuestions · insert researchQuestions"]
-  P --> Fan["Promise.all · runSubagent per question"]
-  Fan --> Sub["Subagent loop: search → judge URLs → scrape → summarize + relevance"]
-  Sub -->|per question| Q["consolidatedSummary on researchQuestions"]
-  Fan --> M["pickMarkets → researchMarketPicks"]
-  M --> F["synthesizeFinal → researchRuns.finalReport"]
-  F --> Done["status: completed"]
+  subgraph client["UI"]
+    UI["Analyze tab · Start / Re-run"]
+  end
 
-  style Stop fill:#78350f,color:#fff
-  style Done fill:#14532d,color:#fff
+  subgraph kickoff["Start research · api.ts"]
+    INS["Insert run · status pending"]
+    WSTART["Start workflow researchEvent"]
+    WID["Save workflow id on run"]
+  end
+
+  subgraph researchEvent["Durable workflow · workflow.ts"]
+    direction TB
+    C["(1) Classify event<br/>speculative vs researchable"]
+    SPEC{Too speculative?}
+    STOP["Stop run · speculative"]
+    P["(2) Plan questions<br/>create question rows"]
+    RS["Mark run · researching"]
+    FAN["(3) Research each question<br/>all questions in parallel"]
+    PM["(4) Pick markets<br/>write recommendations"]
+    SF["(5) Write final memo<br/>mark run completed"]
+    DONE["Done · memo on run"]
+  end
+
+  subgraph subagent["One question · worker.ts"]
+    direction TB
+    LOOP["Repeat up to 3 rounds<br/>stop early after 3 good sources"]
+    S1["Web search · save hits"]
+    J1["Choose URLs to open"]
+    SC["Fetch pages in parallel"]
+    SU["Summarize each page · tag relevant"]
+    FU["Refine search query · next round"]
+    CON["Merge sources into one answer"]
+    QD["Save answer on question"]
+    LOOP --> S1 --> J1 --> SC --> SU
+    SU -->|need more| FU
+    FU --> LOOP
+    SU -->|enough evidence| CON --> QD
+  end
+
+  UI --> INS --> WSTART --> WID
+  WID --> C --> SPEC
+  SPEC -->|yes| STOP
+  SPEC -->|no| P --> RS --> FAN
+  FAN --> PM --> SF --> DONE
+
+  FAN --> LOOP
+
+  classDef terminalOk fill:#14532d,color:#fff,stroke:#166534
+  classDef terminalBad fill:#78350f,color:#fff,stroke:#92400e
+  classDef durable fill:#1e3a5f,color:#fff,stroke:#1e40af
+  class STOP terminalBad
+  class DONE terminalOk
+  class C,P,PM,SF durable
 ```
 
 **Why this shape:** Workflow gives durable execution without rebuilding orchestration in LangGraph for this path. Agent threads persist LLM context for debugging and future features. The UI subscribes with `useQuery` to `researchRuns`, `researchQuestions`, sources, picks, and optional `researchLogs`—no SSE route required.
