@@ -1,5 +1,7 @@
 # Aperture
 
+> This project was developed as a group project for **ECON3086** course at **Hong Kong Baptist University (HKBU)**.
+
 Next.js frontend with a [Convex](https://convex.dev/) backend. The app combines Polymarket event pages (markets, tabs) with an optional **durable AI research workflow** that classifies an event, plans questions, searches and scrapes the open web, then writes a memo plus recommended markets.
 
 ## Polymarket event research (Convex workflow)
@@ -28,28 +30,28 @@ flowchart TD
 
 ### Data model (Convex)
 
-| Table | Purpose |
-| --- | --- |
-| `researchRuns` | One run per kickoff: `eventSlug`, status lifecycle, `speculativeReason`, `finalReport`, `errorMessage`, timestamps |
-| `researchQuestions` | Planned questions with status (`pending` → `searching` / `scraping` / `summarizing` → `done` / `failed`), `iteration`, `consolidatedSummary` |
-| `researchSearchResults` | Firecrawl search hits per question/iteration with scrape `decision` |
-| `researchSources` | Scraped pages: URL, summary, `relevant`, `relevanceReason` |
-| `researchMarketPicks` | Recommended market id, `side` (YES / NO / AVOID / WATCH), conviction, rationale, key risk |
-| `researchLogs` | Debug feed: `phase`, `level`, `message` |
+| Table                   | Purpose                                                                                                                                      |
+| ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| `researchRuns`          | One run per kickoff: `eventSlug`, status lifecycle, `speculativeReason`, `finalReport`, `errorMessage`, timestamps                           |
+| `researchQuestions`     | Planned questions with status (`pending` → `searching` / `scraping` / `summarizing` → `done` / `failed`), `iteration`, `consolidatedSummary` |
+| `researchSearchResults` | Firecrawl search hits per question/iteration with scrape `decision`                                                                          |
+| `researchSources`       | Scraped pages: URL, summary, `relevant`, `relevanceReason`                                                                                   |
+| `researchMarketPicks`   | Recommended market id, `side` (YES / NO / AVOID / WATCH), conviction, rationale, key risk                                                    |
+| `researchLogs`          | Debug feed: `phase`, `level`, `message`                                                                                                      |
 
 Indexes favor listing by `runId` / `questionId` for reactive queries.
 
 ### Code map
 
-| Area | Location |
-| --- | --- |
-| Workflow definition | `convex/research/workflow.ts` |
-| Classify + plan steps | `convex/research/steps.ts` |
-| Per-question subagent loop | `convex/research/worker.ts` |
-| Market pick + final memo | `convex/research/synthesize.ts` |
-| Public API (mutations/queries) | `convex/research/api.ts`, `convex/research/queries.ts` |
-| Convex components | `convex/convex.config.ts` registers `workflow` + `agent` |
-| Analyze UI | `app/(main)/event/[slug]/_components/analyze-panel/` |
+| Area                           | Location                                                 |
+| ------------------------------ | -------------------------------------------------------- |
+| Workflow definition            | `convex/research/workflow.ts`                            |
+| Classify + plan steps          | `convex/research/steps.ts`                               |
+| Per-question subagent loop     | `convex/research/worker.ts`                              |
+| Market pick + final memo       | `convex/research/synthesize.ts`                          |
+| Public API (mutations/queries) | `convex/research/api.ts`, `convex/research/queries.ts`   |
+| Convex components              | `convex/convex.config.ts` registers `workflow` + `agent` |
+| Analyze UI                     | `app/(main)/event/[slug]/_components/analyze-panel/`     |
 
 Authenticated users start a run from the **Analyze** tab; progress, sources, picks, and the markdown memo update live.
 
@@ -120,9 +122,3 @@ Set secrets in the Convex dashboard (or `npx convex env set`) so actions can cal
    [http://localhost:3000](http://localhost:3000)
 
 The `predev` script runs Convex setup hooks; see `package.json` for `dev` / `dev:frontend` / `dev:backend` split.
-
----
-
-## Other features
-
-The same repo includes Convex-backed **companies**, **documents**, discovery jobs, and dashboard integrations (e.g. optional Finnhub / Alpha Vantage keys in `.env.example`). Those paths are separate from the Polymarket research tables above.
