@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { EventSummaryCard } from "./event-summary-card";
 import { MarketList } from "./market-list";
+import { AnalyzePanel } from "./analyze-panel";
 
 export async function EventPageContent({ slug }: { slug: string }) {
   const event = await resolveEvent(slug);
@@ -44,9 +45,7 @@ export async function EventPageContent({ slug }: { slug: string }) {
           </TabsContent>
 
           <TabsContent value="analyze" className="mt-6">
-            <div className="flex min-h-90 items-center justify-center rounded-lg border border-border/60 bg-muted/20 p-6">
-              <Button size="lg">Start Analysis</Button>
-            </div>
+            <AnalyzePanel event={event} />
           </TabsContent>
         </Tabs>
       </div>

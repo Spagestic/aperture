@@ -19,6 +19,14 @@ import type * as firecrawl_scrape from "../firecrawl/scrape.js";
 import type * as firecrawl_search from "../firecrawl/search.js";
 import type * as http from "../http.js";
 import type * as mineru from "../mineru.js";
+import type * as research_agent from "../research/agent.js";
+import type * as research_api from "../research/api.js";
+import type * as research_mutations from "../research/mutations.js";
+import type * as research_queries from "../research/queries.js";
+import type * as research_steps from "../research/steps.js";
+import type * as research_synthesize from "../research/synthesize.js";
+import type * as research_worker from "../research/worker.js";
+import type * as research_workflow from "../research/workflow.js";
 import type * as users from "../users.js";
 
 import type {
@@ -39,6 +47,14 @@ declare const fullApi: ApiFromModules<{
   "firecrawl/search": typeof firecrawl_search;
   http: typeof http;
   mineru: typeof mineru;
+  "research/agent": typeof research_agent;
+  "research/api": typeof research_api;
+  "research/mutations": typeof research_mutations;
+  "research/queries": typeof research_queries;
+  "research/steps": typeof research_steps;
+  "research/synthesize": typeof research_synthesize;
+  "research/worker": typeof research_worker;
+  "research/workflow": typeof research_workflow;
   users: typeof users;
 }>;
 
@@ -68,4 +84,7 @@ export declare const internal: FilterApi<
   FunctionReference<any, "internal">
 >;
 
-export declare const components: {};
+export declare const components: {
+  workflow: import("@convex-dev/workflow/_generated/component.js").ComponentApi<"workflow">;
+  agent: import("@convex-dev/agent/_generated/component.js").ComponentApi<"agent">;
+};
