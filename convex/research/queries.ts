@@ -1,10 +1,8 @@
 import { v } from "convex/values";
-import {
-  internalQuery,
-  query,
-  type QueryCtx,
-} from "../_generated/server";
+import { internalQuery, query, type QueryCtx } from "../_generated/server";
 import type { Id } from "../_generated/dataModel";
+
+import { getAuthUserId } from "@convex-dev/auth/server";
 
 async function loadLatestRunForEvent(ctx: QueryCtx, eventSlug: string) {
   return await ctx.db
@@ -13,6 +11,20 @@ async function loadLatestRunForEvent(ctx: QueryCtx, eventSlug: string) {
     .order("desc")
     .first();
 }
+
+export const getUserHistory = query({
+  args: {},
+  handler: async (ctx) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) return [];
+
+    return await ctx.db
+      .query("researchRuns")
+      .withIndex("by_user", (q) => q.eq("userId", userId))
+      .order("desc")
+      .take(10);
+  },
+});
 
 export const getLatestRun = query({
   args: { eventSlug: v.string() },

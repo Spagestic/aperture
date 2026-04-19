@@ -5,6 +5,7 @@ import Image from "next/image";
 
 import { Searchbar } from "./search-bar";
 import { UserAvatar } from "./user-avatar";
+import { HistoryDropdown } from "./history-dropdown";
 
 export function SiteHeader() {
   return (
@@ -26,6 +27,7 @@ export function SiteHeader() {
           <Searchbar />
         </div>
         <div className="flex shrink-0 items-center gap-2">
+          <HistoryDropdown />
           <UserAvatar />
         </div>
       </div>

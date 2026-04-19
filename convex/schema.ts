@@ -49,7 +49,8 @@ export default defineSchema({
     completedAt: v.optional(v.number()),
   })
     .index("by_event_slug", ["eventSlug"])
-    .index("by_user_and_event", ["userId", "eventSlug"]),
+    .index("by_user_and_event", ["userId", "eventSlug"])
+    .index("by_user", ["userId"]),
 
   researchQuestions: defineTable({
     runId: v.id("researchRuns"),
