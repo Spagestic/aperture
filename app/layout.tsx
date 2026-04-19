@@ -19,9 +19,36 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Aperture",
+  metadataBase: new URL("https://aperturehk.vercel.app"),
+  title: {
+    default: "Aperture",
+    template: "%s | Aperture",
+  },
   description:
-    "Making professional-grade financial data and insights accessible to everyone.",
+    "Aperture is a Polymarket research analysis platform that classifies events, investigates open-web evidence, and produces structured market recommendations.",
+  applicationName: "Aperture",
+  keywords: [
+    "Aperture",
+    "Polymarket",
+    "prediction markets",
+    "event research",
+    "market analysis",
+    "Convex",
+    "AI research workflow",
+  ],
+  openGraph: {
+    title: "Aperture",
+    description:
+      "Research Polymarket events with durable workflows, web evidence synthesis, and recommendation memos.",
+    siteName: "Aperture",
+    type: "website",
+  },
+  twitter: {
+    card: "summary",
+    title: "Aperture",
+    description:
+      "Polymarket event research with AI-assisted evidence gathering and market recommendation memos.",
+  },
   icons: {
     icon: "/logo.jpeg",
   },
