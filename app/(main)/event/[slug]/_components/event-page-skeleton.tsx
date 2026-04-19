@@ -42,7 +42,7 @@ export function EventPageSkeleton() {
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-6">
         <div className="flex w-full items-center justify-between gap-2">
           <Skeleton className="h-10 w-36 rounded-md" />
-          <Skeleton className="h-10 w-28 rounded-md" />
+          <Skeleton className="h-10 w-36 rounded-md" />
         </div>
 
         <section className="space-y-6">
