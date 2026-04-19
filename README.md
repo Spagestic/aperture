@@ -64,6 +64,28 @@ Set secrets in the Convex dashboard (or `npx convex env set`) so actions can cal
 
 ---
 
+## Project Structure
+
+```text
+├── 📁app
+│   ├── 📁(auth)         # Authentication routes
+│   ├── 📁(main)         # Main application routes (Dashboard, Event)
+│   ├── 📁api            # Next.js API routes (chat, scraping, polymarket)
+├── 📁components
+│   ├── 📁ai-elements
+│   ├── 📁prompt-kit
+│   ├── 📁sidebar
+│   └── 📁ui
+├── 📁convex
+│   ├── 📁firecrawl      # Firecrawl API integrations and logic
+│   └── 📁research       # Durable AI research workflow logic
+├── 📁hooks
+├── 📁lib
+└── 📁public
+```
+
+---
+
 ## Getting started
 
 ### Prerequisites
