@@ -9,7 +9,7 @@ import { UserAvatar } from "./user-avatar";
 export function SiteHeader() {
   return (
     <header className="sticky top-0 z-50 flex h-16 shrink-0 items-center gap-2 border-b bg-background">
-      <div className="flex w-full items-center gap-2 px-4 lg:gap-4 lg:px-6">
+      <div className="flex w-full items-center gap-4 px-4 lg:gap-4 lg:px-6">
         <div className="flex shrink-0 items-center gap-1">
           <Link href="/" className="flex items-center group">
             <Image
@@ -19,7 +19,7 @@ export function SiteHeader() {
               src="/logo_.png"
               width={40}
             />
-            <span className="font-semibold">Aperture</span>
+            <span className="font-semibold hidden sm:block">Aperture</span>
           </Link>
         </div>
         <div className="min-w-0 flex-1 justify-center px-2 sm:flex">

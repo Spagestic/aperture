@@ -258,7 +258,7 @@ export function Searchbar() {
                     className="w-full rounded-md border border-border/60 bg-card p-3 text-left transition-colors hover:bg-muted/60"
                     onClick={() => handleSelect(event)}
                   >
-                    <div className="flex items-start gap-3">
+                    <div className="flex items-center gap-3">
                       <div className="flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-muted text-lg">
                         {iconUrl ? (
                           // eslint-disable-next-line @next/next/no-img-element
@@ -272,21 +272,25 @@ export function Searchbar() {
                         )}
                       </div>
 
-                      <div className="min-w-0 flex-1 space-y-1">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <span className="truncate font-medium text-sm">
+                      <div className="min-w-0 flex-1 space-y-1.5">
+                        <div className="flex items-start justify-between gap-4">
+                          <span className="line-clamp-2 font-medium text-sm">
                             {event.title || "Untitled event"}
                           </span>
+                          {totalMarkets > 0 ? (
+                            <span className="hidden sm:block shrink-0 text-xs text-muted-foreground pt-0.5">
+                              {totalMarkets} market
+                              {totalMarkets === 1 ? "" : "s"}
+                            </span>
+                          ) : null}
+                        </div>
+                        <div className="flex flex-wrap items-center gap-2">
                           {event.category ? (
-                            <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] uppercase tracking-wide text-muted-foreground">
+                            <span className="shrink-0 rounded-full bg-muted px-2 py-0.5 text-[10px] uppercase tracking-wide text-muted-foreground">
                               {event.category}
                             </span>
                           ) : null}
                         </div>
-                        <p className="truncate text-xs text-muted-foreground">
-                          {event.slug || event.id}
-                          {totalMarkets > 0 ? ` · ${totalMarkets} markets` : ""}
-                        </p>
                       </div>
                     </div>
                   </button>
