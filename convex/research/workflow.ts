@@ -37,15 +37,26 @@ export const researchEvent = workflow.define({
         status: "researching",
       });
 
-      await Promise.all(
-        (questionIds as Array<Id<"researchQuestions">>).map((questionId) =>
-          step.runAction(
-            internal.research.worker.runSubagent,
-            { runId: args.runId, questionId },
-            { name: `subagent:${questionId}`, retry: true },
+      const questionsList = questionIds as Array<Id<"researchQuestions">>;
+      const chunkSize = 5;
+
+      for (let i = 0; i < questionsList.length; i += chunkSize) {
+        const chunk = questionsList.slice(i, i + chunkSize);
+        await Promise.all(
+          chunk.map((questionId) =>
+            step.runAction(
+              internal.research.worker.runSubagent,
+              { runId: args.runId, questionId },
+              { name: `subagent:${questionId}`, retry: true },
+            ),
           ),
-        ),
-      );
+        );
+
+        // Sleep for 1 minute before starting the next batch to respect Firecrawl rate limits (5 req/min free plan)
+        if (i + chunkSize < questionsList.length) {
+          await step.sleep(60000, { name: `firecrawl-rate-limit-sleep-${i}` });
+        }
+      }
 
       await step.runAction(
         internal.research.synthesize.pickMarkets,
